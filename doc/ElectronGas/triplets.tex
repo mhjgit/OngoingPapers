@@ -1,0 +1,700 @@
+	\chapter{Coupled Cluster Theory}
+	
+	Coupled-cluster (CC) theory was developed by Fritz Coester and Hermann K\"ummel in the late 1950s and early 1960s (\cite{Coester58},\cite{CoesterKummel60},\cite{Kummel62}) with their work on the exponential ansatz\footnote{This term will be explained soon, as well as the coupled-cluster equations.}, and furthermore in the early 1970s by Hermann K\"ummel and K.H. L\"uhrmann (\cite{Kummel71},\cite{KummeLuhrmann72},\cite{KummeLuhrmann72_2}) with explicit derivation of the coupled-cluster equations. The enthusiasm for the CC method came after Ji\v{r}i \v{C}\'{i}\v{z}ek's Ph.D. thesis in 1965, published in 1966 \cite{Cizek66}, where he used the CC-doubles method to perform several calculations on the benzene molecule.\\
+	
+	Coupled-cluster theory has been named the "golden standard" in theoretical chemistry, due its high accuracy with relatively low computational cost. It may be reviewed at great length, but there already exists excellent literature covering the entire field, such as the work by Shavitt and Bartlett \cite{ShavittBartlett09}. Therefore, this chapter will mainly cover that which is deemed necessary at a basic level to understand and apply the method. It will mainly follow the trail of thought presented in \cite{ShavittBartlett09}.
+	
+	
+	\section{The exponential Ansatz}
+	We start by introducing a very simple way to organise our equations. An arbitrary state can expressed as a linear combination of Slater determinants
+	
+	\begin{equation}
+		|\Psi\rangle = |\Phi\rangle + \sum_{a=N+1}^\infty\sum_{i=1}^Nc_i^a|\Phi_i^a\rangle + \frac{1}{4}\sum_{a,b=N+1}^\infty\sum_{i,j=1}^Nc_{ij}^{ab}|\Phi_{ij}^{ab}\rangle +\ldots \:,
+		\label{EQ 3.1 general WF}
+	\end{equation}
+	
+	\noindent where $c_{ijk\ldots}^{abc\ldots}$ are the linear coefficients of each base state. This means all states can be expressed from the Hartree-Fock solution. The linear combination can be rewritten by the use of orbital cluster operators:
+	
+	\begin{align}
+		\hat{T}_1 &\equiv \sum_{a=N+1}^\infty\sum_{i=1}^Nt_i^a a_a^\dagger a_i \:,\\
+		\hat{T}_2 &\equiv \frac{1}{2!}\sum_{a,b=N+1}^\infty\frac{1}{2!}\sum_{i,j=1}^Nt_{ij}^{ab} a_a^\dagger a_b^\dagger a_ ia_j \:,\\
+		\hat{T}_3 &\equiv \frac{1}{3!}\sum_{a,b,c=N+1}^\infty\frac{1}{3!}\sum_{i,j,k=1}^Nt_{ijk}^{abc} a_a^\dagger a_b^\dagger a_c^\dagger a_ia_ja_k \:.\\
+		&\quad\quad\quad\quad\quad\vdots
+	\end{align}
+	
+	In general we define $\hat{T}_n$ as
+	
+	\begin{equation}
+		\hat{T}_n \equiv \left(\frac{1}{n!}\right)^2\sum_{a,b,\ldots=N+1}^\infty\sum_{i,j,\ldots=1}^N t_{ij\ldots}^{ab\ldots} a_a^\dagger a_b^\dagger \ldots a_ia_j\ldots \:.
+	\end{equation}
+	
+	We can only annihilate as many fermions, say $N$, from the reference state $|\Phi\rangle$ as are present in the system. Since $\hat{T}_{N+1}$ annihilates $N+1$ states from $|\Phi\rangle$, leaving zero as the result of annihilating the vacuum, our series ends with $\hat{T}_N$. With these operators, equation (\ref{EQ 3.1 general WF}) can be rewritten as
+	
+	\begin{align}
+		\begin{split}
+		|\Psi\rangle = \Big(\mathds{1} &+ \hat{T}_1 + \frac{1}{2!}\hat{T}_1^2 + \frac{1}{3!}\hat{T}_1^3 + \ldots + \frac{1}{N!}\hat{T}_1^N\\
+		&+ \hat{T}_2 + \frac{1}{2}\hat{T}_2^2 + \frac{1}{3!}\hat{T}_2^3 + \ldots + \frac{1}{(N/2)!}\hat{T}_2^{N/2}\\
+		&+ \ldots + \hat{T}_N \\
+		&+ \hat{T}_2\hat{T}_1 + \frac{1}{2!}\hat{T}_2\hat{T}_1^2 + \ldots\Big)|\Phi\rangle \:.
+		\end{split}
+	\end{align}
+	
+	Notice that we now need to find the coefficients $t_i^a$, $t_{ij}^{ab}$, $\ldots$, rather than $c_i^a$, $c_{ij}^{ab}$, $\ldots$, and that this is the main problem of the CC method. It is customary to call the $t$-coefficients for \emph{amplitudes}. If we now define a new operator $\hat{T} \equiv \hat{T}_1 + \hat{T}_2 + \hat{T}_3 + \ldots + \hat{T}_N$, then the series above may be rewritten:
+	
+	\begin{align}
+		\begin{split}
+		|\Psi\rangle &= \left(\sum_{n=0}^\infty \frac{1}{n!}\hat{T}^n\right)|\Phi\rangle\\
+		&= e^{\hat{T}}|\Phi\rangle
+		\end{split}
+	\end{align}
+	
+	\noindent where $\hat{T}$ is called the \emph{cluster operator}. An $N$ fermion system is fully represented by $\hat{T}|\Phi\rangle$, where $\hat{T} = \mathds{1} + \hat{T}_1 +\ldots+\hat{T}_N$.\\
+	
+	There is a very fortuitous advantage to the exponential Ansatz, which is that size-consistency follows naturally from it. As discussed in the previous chapter, size-consistency requires that the total energy of two non-interacting systems $A$ and $B$, is
+	
+	\begin{equation}
+		E(A+B) = E(A) + E(B)
+	\end{equation}
+	
+	If the two systems are non-interacting, then the ground state ought to be separable:
+	
+	\begin{equation}
+		\Phi_0(AB) = \Phi_0(A)\Phi_0(B)
+	\end{equation}
+	
+	Furthermore, if the cluster operator is additive,
+	
+	\begin{equation}
+		\hat{T}(AB) = \hat{T}(A) + \hat{T}(B)\:,
+	\end{equation}
+	
+	\noindent then we can derive for the full wavefunction:
+	
+	\begin{align}
+		\begin{split}
+			\Psi(AB) &= e^{\hat{T}(AB)}\Phi_0(AB) \\
+			&= e^{\hat{T}(A)}e^{\hat{T}(B)}\Phi_0(A)\Phi_0(B) \\
+			&= e^{\hat{T}(A)}\Phi_0(A)e^{\hat{T}(B)}\Phi_0(B) \\
+			&= \Psi(A)\Psi(B) 
+		\end{split}
+	\end{align}
+	
+	As we see, even the wavefunctions for the systems are independent. Last, we explicitly check size-consistency;
+	
+	\begin{align}
+		\begin{split}
+			\hat{H}(AB)\Psi(AB) &= \left[ \hat{H}(A) + \hat{H}(B) \right]\Psi(A)\Psi(B) \\
+			&= \left[ \hat{H}(A)\Psi(A)\right]\Psi(B) + \Psi(A)\left[\hat{H}(B)\Psi(B)\right] \\
+			&= \left[E(A) + E(B)\right]\Psi(AB)
+		\end{split}
+	\end{align}
+	
+	\section{The coupled cluster equations}
+	With the exponential ansatz at hand, we can, in theory, tackle any system, since if we introduce more interactions to our model, we simply add more cluster operators. However, the reason we do not, just as for the Hartree-Fock equations, MBPT, and CI, is the huge computational effort required for each new operator introduced. In fact, even the triples operators are so time consuming that they are often omitted in computational studies, not to mention $n\geq 4$ operators. The reason why the computational time increases so rapidly can be seen from the \emph{coupled-cluster equations}.\\
+	
+	The coupled-cluster equations are used to find the correlation amplitudes $t_{ij\ldots}^{\alpha\beta\ldots}$, which are needed to calculate the coupled-cluster energy $E_{CC}$. A possible starting point is then:
+	
+	\begin{equation}
+		\overbar{H}|\Phi_0\rangle = E_{CC}|\Phi_0\rangle
+		\label{EQ 3.2 general energy equation}
+	\end{equation}
+	
+	\noindent where $\bar{H}$ is the similarity transform of the Hamiltonian operator, i.e.
+	
+	\begin{equation}
+		\overbar{H} = e^{-\hat{T}}\hat{H}_Ne^{\hat{T}}
+	\end{equation}
+	
+	
+	\noindent where
+	
+	\begin{equation}
+		\hat{H}_N = \hat{H} - \langle\Phi_0|\hat{H}|\Phi_0\rangle
+	\end{equation}
+	
+	\noindent is the system Hamiltonian but with the reference energy subtracted. If we now act from the left in equation (\ref{EQ 3.2 general energy equation}) with either $\langle\Phi_0|$ or $\langle\Phi^*| = \langle\Phi_{ij\ldots}^{\alpha\beta\ldots}|$, we get two results:
+	
+	\begin{align}
+	\langle\Phi_0|\overbar{H}|\Phi_0\rangle &= E_{CC}
+	\label{EQ 3.2 general CC equation for energy}\\
+	\langle\Phi^*|\overbar{H}|\Phi_0\rangle &= 0
+	\label{EQ 3.3 general CC equation for amplitudes}
+	\end{align}
+	
+	These are the CC equations. The CC amplitudes are unknown, so we need to solve the CC equations to find them, and then use the amplitudes to calculate $E_{CC}$ using equation (\ref{EQ 3.2 general CC equation for energy}). The coupled cluster method therefore seems to consist of writing down all the CC equations (equation (\ref{EQ 3.3 general CC equation for amplitudes})), solving them by finding the correct amplitudes, and finally using the amplitudes to calculate $E_{CC}$. Logically simple but practically difficult.\\
+	
+	The big problem is finding the CC amplitudes. Since they are unknown, where do we start? It turns out we may solve them iteratively, by using the amplitudes at one iteration to find the amplitudes at the next. Therefore we need an equation for the iterative process.\\
+	
+	Before ending this section, we simplify the problem by deciding to rewrite $\overbar{H}$ using the Baker-Campbell-Hausdorff expansion to get \cite{ShavittBartlett09};
+	
+	\begin{equation}
+		\overbar{H} = \hat{H}_N + \left[ \hat{H}_N,\hat{T} \right] + \frac{1}{2!}\left[\left[ \hat{H}_N,\hat{T} \right],\hat{T}\right] + \frac{1}{3!}\left[\left[ \left[\hat{H}_N,\hat{T} \right],\hat{T}\right],\hat{T}\right] + \ldots\:,
+		\label{EQ 3.2 BCH expansion}
+	\end{equation}
+	
+	The generalized Wick's theorem states that contractions within a normal-ordered string give zero contribution in a product of normal-ordered strings, i.e:
+	
+	\begin{equation}
+		\{S_1\}\{S_2\}\{S_3\}\ldots = \{S_1S_2S_3\ldots\} + \sum_{\text{(1)}}\{\contraction[2pt]{}{S}{{}_1}{S}S_1S_2S_3\ldots\} + \sum_{\text{(2)}}\{\contraction[4pt]{S_1S_2}{S}{{}_3}{\ldots}\contraction[2pt]{}{S}{{}_1}{S}S_1S_2S_3\ldots\} + \ldots
+	\end{equation}
+	
+	\noindent where $S_i$ are strings of operators. Since both $\hat{H}_N$ and $\hat{T}$ are written in normal-ordered form, we express all products in equation (\ref{EQ 3.2 BCH expansion}) using Wick's theorem. From the section on second quantisation, we know the commutation relations of the creation and annihilation operators within $\hat{H}_N$ and $\hat{T}$, and that the only non-zero contractions are:
+	
+	\begin{align}
+		\contraction[2pt]{}{\hat{a}}{}{\hat{b}}\hat{a}\hat{b}^\dagger &= \delta_{ab}\\
+		\contraction[2pt]{}{\hat{i}}{{}^\dagger}{\hat{j}}\hat{i}^\dagger\hat{j} &= \delta_{ij}
+	\end{align}
+	
+	From these two identities, it is easy to realize that all contractions between cluster operators are zero, and the same goes for all contractions between $\hat{H}_N$ and $\hat{T}$ where $\hat{T}$ is to the left of $\hat{H}_N$. The only remaining, non-zero terms are:
+	
+	\begin{align}
+		\begin{split}
+		\overbar{H} &= \hat{H}_N + \frac{1}{2} \contraction[2pt]{}{\hat{H}}{{}_N}{\hat{T}}\hat{H}_N\hat{T} + \frac{1}{3!}\contraction[2pt]{}{\hat{H}}{{}_N}{\hat{T}}
+		\contraction[2pt]{}{\hat{H}}{{}_N\hat{T}}{\hat{T}}\hat{H}_N\hat{T}\hat{T} + \ldots \\
+		&= \left(\hat{H}_Ne^{\hat{T}}\right)_C
+		\end{split}
+	\end{align}
+	
+	Here we have introduced the notation $(\ldots)_C$, where the subscript means the leftmost operator is contracted at least once with every operator to the right.\\
+	
+	Now, the CC equations look as follows:
+	
+	\begin{align}
+	\langle\Phi_0|\left(\hat{H}_Ne^{\hat{T}}\right)_C|\Phi_0\rangle &= E_{CC}\\
+	\langle\Phi^*|\left(\hat{H}_Ne^{\hat{T}}\right)_C|\Phi_0\rangle &= 0
+	\end{align}
+	
+	We have greatly reduced the number of terms compared to the earlier CC equations.
+	
+	\section{Diagrammatic approach}
+	The easiest way to derive the CC amplitude equations is by the use of \emph{Feynman-Goldstone diagrams}. This method is often called the diagrammatic approach, and is favourable because it is visually intuitive, reducing the possibility of algebraic mistakes, and because we automatically sum over equivalent terms in a single diagram, meaning we do not fill a whole library every time we write down the equations. Those acquainted with basic Feynman diagrams, and the reasoning behind them, will recognise these qualities of the diagrammatic approach.
+	
+	\subsection{Diagram rules}
+	Like Feynman diagrams, CC diagrams (or Goldstone diagrams) follow a series of rules regarding lines, arrows, and vertices. There are 10 rules \cite{ShavittBartlett09} regarding the interpretation of diagrams.
+	
+	\fbox{\parbox{14cm}{Rules for interpretation of diagrams:
+			\begin{enumerate}
+				\item \emph{Labelling}: Open lines are labelled as holes if they point downwards and as particles if they point upwards. These labels are the indices of the "bra" in equation (\ref{EQ 3.3 general CC equation for amplitudes}).
+				
+				\item \emph{One-body prefactor}: A one-particle interaction gives a factor $f_{out,in}$.
+			
+				\item \emph{Two-body prefactor}: A two-particle interaction gives a factor\\ $\langle\: \text{left-out} \: \text{right-out} \:||\: \text{left-in} \: \text{right-in} \:\rangle$.
+				
+				\item \emph{Amplitude prefactors}: A connection gives a factor $t_{ij\ldots}^{ab\ldots}$.
+				
+				\item \emph{Summation of indices}: All internal lines, or labels, are in sums.
+				
+				\item \emph{Equivalent internal lines}: Equivalent internal lines give a factor $\frac{1}{2}$. Two internal lines are considered equivalent when they point in the same direction and connect the same two vertices.
+				
+				\item \emph{Equivalent $T$-vertices}: Equivalent $\hat{T}_m$ vertices give a factor $\frac{1}{2}$. Such vertices are considered equivalent if they have the same number of line pairs and connect in the same way to the interaction vertex.
+				
+				\item \emph{Phase factor}: Each diagram has a factor $(-1)^{h-l}$, where $h$ is the number of hole lines and $l$ is the number of loops. External lines are considered "looped", so for a bra $\langle \Phi_{ij}^{ab}|$ we would immediately add +2 to $l$, since $(i,a)$ and $(j,b)$ are considered to form "quasiloops".
+				
+				\item \emph{Permutation of external lines}: For a pair of external lines that are connected to the same vertex, we consider them equivalent. We sum over all permutations of inequivalent external lines, with a prefactor $(-1)^{\sigma(P)}$ for each term.
+				
+				\item \emph{Factor cancellation}: We cancel a factor $\frac{1}{2}$ caused by equivalent $\hat{T}_m$-vertices for each pair of external lines connected to equivalent vertices.
+			\end{enumerate}}}
+	
+	\subsection{Sign labels}
+	%page 299 Shavitt and Bartlett
+	A tool that lets us easily construct all possible Goldstone diagrams for some CC equation is known as \emph{sign labels}. A sign label is an assignment of signs (pluses or minuses) to a vertex diagram. We can then match different vertex diagrams such that the combined diagram has a certain excitation level. For example, if we want to draw all the diagrams included in the equation $\langle\Phi_{ij}^{ab}|\left(\hat{H}_Ne^{\hat
+		T}\right)|\Phi_0\rangle = 0$, then we need to include all diagrams where the excitation level is 2, since $\langle\Phi_{ij}^{ab}|$ has excitation level 2. We will explain more further on.\\
+	The convention is as follows.\\
+	
+	\emph{Sign labels:} To each open hole line we assign a minus, and to each open particle line we assign a plus. Internal lines are not assigned any sign, which we will symbolize by a zero, i.e.\\
+	
+	\begin{figure}[h]
+		\centering
+		$
+		\underset{\Scale[1]{(-)}\hspace{0.005cm}}{\bdiags
+		\dTtd{1}{t}
+		\dTt{1}{tt}
+		\dline{t1}{tt1}
+		\ediag}
+		$
+		\hspace{2cm}
+		$
+		\underset{\Scale[1]{(0)}\hspace{0.005cm}}{\bdiags
+			\dnoarrow
+			\dTv{1}{t}
+			\dTdv{1}{td}
+			\dline{t}{td}
+			\ediag}
+		$
+		\hspace{2cm}
+		$
+		\underset{\Scale[1]{(+)}\hspace{0.005cm}}{\bdiags
+			\dTtd{1}{t}
+			\dTt{1}{tt}
+			\dline{tt1}{t1}
+			\ediag}
+			$
+	\end{figure}
+	
+	A good example of the sign convention is the terms in the normal-product form of the Hamiltonian operator ($\hat{H}_N$). We know we can write $\hat{H}_N = \hat{F}_N + \hat{W}$, where we have:
+	
+	\begin{equation}
+		\hat{F}_N = \sum_{pq} f_{pq}\{\hat{p}^\dagger \hat{q}\} = \sum_{ab} f_{ab}\{\hat{a}^\dagger \hat{b}\} + \sum_{ij} f_{ij}\{\hat{i}^\dagger \hat{j}\} + \sum_{ai} f_{ai}\{\hat{a}^\dagger \hat{i}\} + \sum_{ia} f_{ia}\{\hat{i}^\dagger \hat{a}\} \:,
+	\end{equation}
+	
+	\noindent as the one-body term, and
+	
+	\begin{align}
+		\begin{split}
+		\hat{W} = \frac{1}{2}\sum_{pqrs}\langle pq||rs\rangle \{\hat{p}^\dagger\hat{q}^\dagger\hat{r}\hat{s}\} = &\frac{1}{4}\sum_{abcd}\langle ab||cd\rangle \{\hat{a}^\dagger\hat{b}^\dagger\hat{d}\hat{c}\} + \frac{1}{4}\sum_{ijkl}\langle ij||kl\rangle \{\hat{i}^\dagger\hat{j}^\dagger\hat{k}\hat{l}\} + \sum_{ijab}\langle ai||bj\rangle \{\hat{a}^\dagger\hat{i}^\dagger\hat{j}\hat{b}\} \\
+		+&\frac{1}{2}\sum_{abci}\langle ab||ci\rangle \{\hat{a}^\dagger\hat{b}^\dagger\hat{i}\hat{c}\} + \frac{1}{2}\sum_{ijka}\langle ia||jk\rangle \{\hat{i}^\dagger\hat{a}^\dagger\hat{k}\hat{j}\} + \frac{1}{2}\sum_{abci}\langle ai||bc\rangle \{\hat{a}^\dagger\hat{i}^\dagger\hat{c}\hat{b}\} \\
+		+&\frac{1}{2}\sum_{ijka}\langle ij||ka\rangle \{\hat{i}^\dagger\hat{j}^\dagger\hat{a}\hat{k}\} + \frac{1}{4}\sum_{abij}\langle ab||ij\rangle \{\hat{a}^\dagger\hat{b}^\dagger\hat{j}\hat{i}\} + \frac{1}{4}\sum_{ijab}\langle ij||ab\rangle \{\hat{i}^\dagger\hat{j}^\dagger\hat{b}\hat{a}\} \:,
+		\end{split}
+	\end{align}
+	
+	\noindent as the two-body term of the normal-ordered Hamiltonian. Perhaps not pretty, but certainly systematic. We are now curious as to how this looks in diagrammatic form. Recalling that annihilation operators remove states that are already present in $|\Phi\rangle$ (our reference Slater determinant), the annihilation operators symbolise states that are "inbound" to some interaction vertex, i.e. lines coming in from below. In the same manner, the creation operator creates states, "outbound" states, meaning lines that move from the vertex and up. If we study equations 9.105 and 9.106 in \cite{ShavittBartlett09}, shown below, it is easy to understand how the diagrams represent the algebraic terms.
+	
+	\input{One_body_diagrams}
+	\input{Two_body_diagrams}
+	
+	We see that it is fairly easy to interpret the diagrams in this simple form. Consider now the signs of each diagram:
+	
+	\input{Hamiltonian_signs}
+	\newpage
+	Since the CC equations consist of terms where the Hamiltonian is contracted with orbital cluster operators, we need to know how to construct the CC operators as diagrams. It is important to note that since there are always summations of the indices in the CC operators, we need not write arrows on the lines, only how many of each sign there are\footnote{If we really wanted to, we would be free to write arrows. It is just unnecessary.}. Below we show the first 3 cluster operator vertices.
+	
+	\begin{figure}[h]
+		\centering
+		$
+		\underset{+\quad-}{\bdiag
+		\dhscale{1.5}
+		\dTs{1}{t}
+		\dnoarrow
+		\dline{tv1}{t}
+		\dline{t}{tv2}
+		\ediag}
+		$
+		\hspace{2cm}
+		$
+		\underset{+\quad+\quad-\quad-}{\bdiag
+		\dhscale{1.5}
+		\dTs{2}{tt}
+		\dnoarrow
+		\dline{tt1v1}{tt1}
+		\dline{tt1}{tt1v2}
+		\dline{tt2v1}{tt2}
+		\dline{tt2}{tt2v2}
+		\ediag}
+		$
+		\hspace{2cm}
+		$
+		\underset{+\quad+\quad+\quad-\quad-\quad-}{\bdiag
+		\dhscale{1.5}
+		\dTs{3}{ttt}
+		\dnoarrow
+		\dline{ttt1v1}{ttt1}
+		\dline{ttt1}{ttt1v2}
+		\dline{ttt2v1}{ttt2}
+		\dline{ttt2}{ttt2v2}
+		\dline{ttt3v1}{ttt3}
+		\dline{ttt3}{ttt3v2}
+		\ediag}
+		$
+	\end{figure}
+	
+	We now have all we need to start constructing diagrams. As explained at the start of this section, we need to match vertex diagrams to form combined diagrams with a certain excitation level. All combined diagrams are then added to give all the terms of the same CC equation. Since the energy equation has an excitation level of zero, then the amplitude equations follow in ascending order of excitation.\\
+	
+	An example of how we may now proceed might be useful. Say we wish to construct the diagram that gives the term $\hat{H}_{N,8}\hat{T}_1\hat{T}_2$, where $\hat{H}_{N,8}$ is the 8th diagram of the above Hamiltonian diagrams. Below we show all distinct diagrams as well as their algebraic interpretations.
+	
+	\begin{figure}[h]
+		\centering
+		$\bdiag
+			\dmoveH{1}
+			\dT{1}{t}
+			\dWs{w1}{w2}
+			\dmoveT{1}
+			\dT{2}{tt}
+			\dcurcur{w1}{t}
+			\dcurcur{t}{w1}
+			\dline{tt1}{w2}
+			\dline[$\:a$]{w2}{w2v1}
+			\dline[$\:i$]{tt1v2}{tt1}
+			\dline[\raisebox{1cm}{$j$}]{tt2v1}{tt2}
+			\dline[$\:b$]{tt2}{tt2v2}
+			\ediag
+		$
+		\hspace{2cm}
+		$
+		\bdiag
+		\dmoveH{1.65}
+		\dT{1}{t}
+		\dWs{w1}{w2}
+		\dmoveT{0.8}
+		\dT{2}{tt}
+		\dline[\raisebox{1cm}{$i$}]{tv1}{t}
+		\dline{t}{w1}
+		\dline[$\:a$]{w1}{tv2}
+		\dcurcur{tt1}{w2}
+		\dcurcur{w2}{tt1}
+		\dline[\raisebox{1cm}{$j$}]{tt2v1}{tt2}
+		\dline[$\:b$]{tt2}{tt2v2}
+		\ediag
+		$
+		\hspace{2cm}
+		$
+		\bdiag
+		\dmoveH{0.6}
+		\dT{1}{t}
+		\dscaleop{1.55}
+		\dWs{w1}{w2}
+		\dscaleop{1}
+		\dmoveT{1}
+		\dT{2}{tt}
+		\dline[\raisebox{1cm}{$i$}]{tv1}{t}
+		\dline{t}{w1}
+		\dline[$\:a$]{w1}{tv2}
+		\dline[\raisebox{1cm}{$\:j$}]{tt1v1}{tt1}
+		\dline{tt1}{w2}
+		\dline{w2}{tt2}
+		\dline[$\:b$]{tt2}{tt2v2}
+		\ediag
+		$
+	\end{figure}
+	
+	Finally, there is also the diagram:
+	
+	\begin{figure}[h]
+		\centering
+		$
+		\bdiag
+		\dmoveH{6}
+		\dT{1}{t}
+		\dscaleop{0.9}
+		\dWs{w1}{w2}
+		\dscaleop{1}
+		\dmoveT{1}
+		\dT{2}{tt}
+		\dline[\raisebox{1cm}{$i$}]{tv1}{t}
+		\dline[$\:a$]{t}{tv2}
+		\dcurcur{tt1}{w1}
+		\dcurcur{w1}{tt1}
+		\dline[$\:j$]{tt2v2}{tt2}
+		\dline{tt2}{w2}
+		\dline[$\:b$]{w2}{tt2v1}
+		\ediag
+		$
+	\end{figure}
+	
+	There is, however, one last theorem we need in order to fully utilize the diagrammatic method. Up until now, we have not made any distinction between unlinked diagrams, where we multiply two separate diagrams to give us the desired excitation level, and linked diagrams, where all vertices are connected (or linked) in some way. Above, we had three linked diagrams and one unlinked. While this does not seem so bad, we would find that the number of diagrams increases dramatically if we always included all possible diagrams with excitation level 2. Fortunately, there is exists a theorem, named the \emph{linked-diagram theorem}, which states that only terms associated with linked diagrams contribute to the wavefunction energy. This means that any composite diagram, made up of two or more closed diagrams which are not all connected in some way, \emph{will not} contribute to the CC energy. The proof is not too long, but we shall simply refer the reader to chapters 5 and 6 of \cite{ShavittBartlett09}.
+	
+	\section{Coupled-cluster models}
+	Now that we have covered the basic formalism of the CC method, we can move onto their analytical expressions. We list the tables in the CCD and CCDT models\footnote{These are the models we shall be using. Other methods are listed in detail in \cite{ShavittBartlett09}.} below such that the reader may easily which of the CC diagrammatic rules are used to give which factors. To perform a CC analysis, we shall have to implement the following expressions in computer code.
+	
+	\subsection{A first example: coupled-cluster doubles (CCD)}
+	With the rules for constructing and interpreting the CC diagrams, we can begin looking at various coupled-cluster models, starting with the so-called Coupled-Cluster doubles equations. If we set $\hat{T} = \hat{T}_2$, we choose to consider CCD. That is, we consider only double excitations in our CC operator. This means our amplitude equations are given by the sum of all possible linked diagrams with excitation level 2. In table \ref{CC | table | "CCD amp eq derivation"} below, we show all CCD amplitude diagrams together with their algebraic interpretation in such a manner that it is easy to see which rule gives which factor. Note that rule 10 does not apply to any diagram here.
+	
+	\begin{table}[h]
+	\centering
+	\caption{All terms for the CCD amplitude equations. Note that rule 10 does nothing here.}
+	\begin{tabular}{cccccccccc}
+		Name & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & \\ \hline
+		& $f_{k,i}$ &  & $t_{jk}^{ab}$ & $\sum_{k}$ &  &  & $(-1)^{2-2}$ & $P(ij)$ &\\
+		& $f_{a,c}$ &  & $t_{ij}^{cb}$ & $\sum_{c}$ &  &  & $(-1)^{3-2}$ & $P(ab)$ &\\
+		$L_a$ & & $\langle kl||ij \rangle$ & $t_{kl}^{ab}$ & $\sum_{kl}$ & $\frac{1}{2}$ &  & $(-1)^{2-2}$ &  &\\
+		$L_b$ & & $\langle ab||cd \rangle$ & $t_{ij}^{cd}$ & $\sum_{cd}$ & $\frac{1}{2}$ &  & $(-1)^{2-2}$ &  &\\
+		$L_c$ & & $\langle kb||ic \rangle$ & $t_{kj}^{ac}$ & $\sum_{ck}$ &  &  & $(-1)^{3-2}$ & $P(ab)P(ij)$ &\\
+		$Q_a$ & & $\langle kl||cd \rangle$ & $t_{kl}^{ab}$ $t_{ji}^{dc}$ & $\sum_{klcd}$ & $\frac{1}{4}$ &  & $(-1)^{4-2}$ &  &\\
+		$Q_b$ & & $\langle kl||cd \rangle$ & $t_{ki}^{ac}$ $t_{lj}^{bd}$ & $\sum_{klcd}$ &  & $\frac{1}{2}$ & $(-1)^{4-4}$ & $P(ab)P(ij)$ &\\
+		$Q_c$ & & $\langle kl||cd \rangle$ & $t_{ki}^{cd}$ $t_{lj}^{bd}$ & $\sum_{klcd}$ & $\frac{1}{2}$ &  & $(-1)^{4-3}$ & $P(ij)$ &\\
+		$Q_d$ & & $\langle kl||cd \rangle$ & $t_{lk}^{ac}$ $t_{ji}^{bd}$ & $\sum_{klcd}$ & $\frac{1}{2}$ &  & $(-1)^{4-3}$ & $P(ab)$ &\\ \hline
+	\end{tabular}
+	\label{CC | table | "CCD amp eq derivation"}
+	\end{table}
+	
+	By adding all CCD amplitude terms, we now arrive at\footnote{We must also add the lone Hamiltonian term, which is the first term seen here.}
+	
+	\begin{align}
+		\begin{split}
+		\langle ab||ij\rangle &+ \hat{P}(ab)\sum_{c}f_{bc}t_{ij}^{ac} - \hat{P}(ij)\sum_{k}f_{kj}t_{kj}^{ab}\\
+		&+ \frac{1}{2}\sum_{cd}\langle ab||cd\rangle t_{ij}^{cd} + \frac{1}{2}\sum_{kl}\langle kl||ij\rangle t_{kl}^{ab} + \hat{P}(ij|ab)\sum_{kc}\langle kb||cj\rangle t_{ik}^{ac}\\
+		&+ \frac{1}{4}\sum_{klcd}\langle kl||cd\rangle t_{ij}^{cd}t_{kl}^{ab} + \hat{P}(ij)\sum_{klcd}\langle kl||cd\rangle t_{ik}^{ac}t_{jl}^{bd}\\
+		&- \frac{1}{2}\hat{P}(ij)\sum_{klcd}\langle kl||cd\rangle t_{ik}^{dc}t_{lj}^{ab} - \frac{1}{2}\hat{P}(ab)\sum_{klcd}\langle kl||cd\rangle t_{lk}^{ac}t_{ij}^{db}\\
+		&= 0\:.
+		\end{split}
+	\end{align}
+	
+	As mentioned earlier, with a canonical Hartree-Fock basis, all off-diagonal elements of the Fock matrix ($f_{\alpha\beta}$) are zero, and only the self-energy terms remain, which we now denote $\epsilon_i \equiv f_{ii} = h_i + \sum_{j}\langle ij||ij\rangle$. We may then rewrite the above equation as
+	
+	\begin{equation}
+		(\epsilon_i+\epsilon_j-\epsilon_a-\epsilon_b)t_{ij}^{ab} = \langle ab||ij\rangle + L(t) + Q(t) \:,
+	\end{equation}
+	
+	\noindent or
+	
+	\begin{equation}
+		t_{ij}^{ab} = \frac{\langle ab||ij\rangle + L(t) + Q(t)}{\epsilon_i+\epsilon_j-\epsilon_a-\epsilon_b} \:,
+		\label{CC | eq | "CCD amplitudes equation"}
+	\end{equation}
+	
+	\noindent where $L(t)$ is the sum over all the ladder diagrams ($L_a$ to $L_c$) and $Q(t)$ is the sum over all quadratic $\hat{T}_2$ terms ($Q_a$ to $Q_d$). Each term is already shown in table \ref{CC | table | "CCD amp eq derivation"}.
+	
+	\subsection{Coupled-cluster singles and doubles (CCSD)}
+	Deriving the CCSD equations is not very difficult, but it requires much caution as we are very prone to mistakes. For a full derivation we simply refer the reader to excellent derivations as presented in \cite{ShavittBartlett09} and \cite{Hansen15}. As we now have two different kinds of amplitudes, $t_i^a$ and $t_{ij}^{ab}$, we get two distinct sets of amplitude equations. We can further note that the amplitudes contribute to one another, which we already expected from the exponential ansatz and the contracted form of the CC equations ($\langle\Phi^*|\{\hat{H}_Ne^{\hat{T}}\}_C|\Phi_0\rangle = 0$).
+	
+	\subsection{Coupled-cluster doubles and triples (CCDT)}
+	We define the cluster operator as $\hat{T} = \hat{T}_2 + \hat{T}_3$. In addition to the CCD diagrams (table \ref{CC | table | "CCD amp eq derivation"}), we get two additional diagrams that contribute to the $T_2$ amplitudes, shown in table \ref{CC | table | "CCDT T2 amp eq derivation"}. In table \ref{CC | table | "CCDT T3 amp eq derivation"} we show all $T_3$ amplitude diagrams.
+	
+	\begin{table}[h]
+		\centering
+		\caption{$T_3$ contributions to $T_2$ amplitude equations. Note that rules 6, 7, and 10 do nothing here.}
+		\begin{tabular}{cccccccccc}
+			Name & 2 & 3 & 4 & 5 & 8 & 9 & \\ \hline
+			$D_{10b}$ & & $\langle ak||cd \rangle$ & $t_{ijk}^{cdb}$ & $\sum_{cdk}$ & $(-1)^{2-2}$ & $P(ab)$ &\\
+			$D_{10c}$ & & $\langle kl||cj \rangle$ & $t_{ikl}^{cab}$ & $\sum_{ckl}$ & $(-1)^{3-2}$ & $P(ij)$ &\\ \hline
+		\end{tabular}
+		\label{CC | table | "CCDT T2 amp eq derivation"}
+	\end{table}
+	
+	\begin{table}[h]
+		\centering
+		\caption{All terms for the $T_3$ amplitude equations in the CCDT model. Note that rules 7 and 10 do nothing here.}
+		\begin{tabular}{ccccccccc}
+			Name & 2 & 3 & 4 & 5 & 6 & 8 & 9 & \\ \hline
+			& $f_{c,d}$ & & $t_{ijk}^{abd}$ & $\sum_d$ & & $(-1)^{3-3}$ & $P(c/ab)$ & \\
+			& $f_{l,k}$ & & $t_{ljk}^{abc}$ & $\sum_l$ & & $(-1)^{4-3}$ & $P(k/ij)$ & \\
+			$T_{1a}$ & & $\langle bc||dk \rangle$ & $t_{ij}^{ad}$ & $\sum_{d}$ & & $(-1)^{3-3}$ & $P(a/bc)P(k/ij)$ &\\
+			$T_{1b}$ & & $\langle lc||jk \rangle$ & $t_{il}^{ab}$ & $\sum_{l}$ & & $(-1)^{4-3}$ & $P(c/ba)P(i/jk)$ &\\
+			$T_{2c}$ & & $\langle ab||de \rangle$ & $t_{ijk}^{dec}$ & $\sum_{de}$ & $\frac{1}{2}$ & $(-1)^{3-3}$ & $P(c/ab)$ &\\
+			$T_{2d}$ & & $\langle lm||ij \rangle$ & $t_{lmk}^{abc}$ & $\sum_{lm}$ & $\frac{1}{2}$ & $(-1)^{5-3}$ & $P(k/ij)$ &\\
+			$T_{2e}$ & & $\langle al||id \rangle$ & $t_{ljk}^{dbc}$ & $\sum_{ld}$ & & $(-1)^{4-4}$ & $P(a/bc)P(i/jk)$ &\\
+			$T_{3b}$ & & $\langle lb||de \rangle$ & $t_{id}^{al}t_{jk}^{ec}$ & $\sum_{dle}$ & & $(-1)^{4-4}$ & $P(abc)P(i/jk)$ &\\
+			$T_{3c}$ & & $\langle lm||dj \rangle$ & $t_{id}^{al}t_{mk}^{bc}$ & $\sum_{dlm}$ & & $(-1)^{5-4}$ & $P(a/bc)P(ijk)$ &\\
+			$T_{3d}$ & & $\langle lc||de \rangle$ & $t_{il}^{ab}t_{jk}^{de}$ & $\sum_{dle}$ & $\frac{1}{2}$  & $(-1)^{4-3}$ & $P(c/ba)P(i/jk)$ &\\
+			$T_{3e}$ & & $\langle lm||dk \rangle$ & $t_{ij}^{ad}t_{lm}^{bc}$ & $\sum_{dlm}$ & $\frac{1}{2}$ & $(-1)^{5-3}$ & $P(a/bc)P(k/ij)$ &\\
+			$T_{5a}$ & & $\langle lm||de \rangle$ & $t_{il}^{ad}t_{mjk}^{ebc}$ & $\sum_{lmde}$ & & $(-1)^{5-5}$ & $P(a/bc)P(i/jk)$ &\\
+			$T_{5b}$ & & $\langle lm||de \rangle$ & $t_{li}^{de}t_{mjk}^{abc}$ & $\sum_{lmde}$ & $\frac{1}{2}$ & $(-1)^{5-4}$ & $P(i/jk)$ &\\
+			$T_{5c}$ & & $\langle lm||de \rangle$ & $t_{lm}^{da}t_{ijk}^{ebc}$ & $\sum_{lmde}$ & $\frac{1}{2}$ & $(-1)^{5-4}$ & $P(a/bc)$ &\\
+			$T_{5d}$ & & $\langle lm||de \rangle$ & $t_{ij}^{ad}t_{lmk}^{bec}$ & $\sum_{lmde}$ & $\frac{1}{2}$ & $(-1)^{5-4}$ & $P(a/bc)P(k/ij)$ &\\
+			$T_{5e}$ & & $\langle lm||de \rangle$ & $t_{il}^{ab}t_{jmk}^{dec}$ & $\sum_{lmde}$ & $\frac{1}{2}$ & $(-1)^{5-4}$ & $P(c/ab)P(i/jk)$ &\\
+			$T_{5f}$ & & $\langle lm||de \rangle$ & $t_{ij}^{de}t_{lmk}^{abc}$ & $\sum_{lmde}$ & $\frac{1}{4}$ & $(-1)^{5-3}$ & $P(k/ij)$ &\\
+			$T_{5g}$ & & $\langle lm||de \rangle$ & $t_{lm}^{ab}t_{ijk}^{dec}$ & $\sum_{lmde}$ & $\frac{1}{4}$ & $(-1)^{5-3}$ & $P(c/ab)$ &\\ \hline
+		\end{tabular}
+		\label{CC | table | "CCDT T3 amp eq derivation"}
+	\end{table} 
+	
+	We have only listed the CCDT amplitude terms, which might seem strange. After all, by writing the full CCSDT equations, we can easily get the CCDT equations by setting all singles amplitudes ($t_i^a$) to zero. However, as we have mentioned, working with Bloch wavefunctions means we already have a Hartree-Fock basis. With a Hartree-Fock basis, all off-diagonal Fock matrix elements ($f_{p,q}$) are zero\footnote{Remember that a Hartree-Fock basis is found by diagonalising the Fock matrix.}.
+	
+	\section{Convergence of iterative series}
+	We have not mentioned exactly how the CC amplitude equations are solved, but we did mention that it was important to write them in the form of equation (\ref{CC | eq | "CCD amplitudes equation"}). We say we have a self-consistent equation. Every $(t_{ij\ldots}^{ab\ldots})_{n+1}$ is defined from $(t_{ij\ldots}^{ab\ldots})_{n}$, and begins with some reasonable initial guess. In the case of CCD, we start with MBPT2, as mentioned. We keep going through this algorithm until a constant expression for $E_{CC}$ is reached, which rarely takes more than $50$ iterations. However, sometimes we get divergent results. This is typical for the nuclear potentials we will discuss later on. To deal with divergences, a suppression is put on the equations. That is, we use a \emph{relaxation parameter} $\alpha$ such that
+	
+	\begin{equation}
+		(t_{ij\ldots}^{ab\ldots})_{n+1} = \alpha(t_{ij\ldots}^{ab\ldots})_{n+1} + (1-\alpha)(t_{ij\ldots}^{ab\ldots})_{n}
+	\end{equation}
+	
+	This relaxation parameter reduces the "oscillation" the CC iterations as they converge towards self-consistent solutions. Furthermore, the relaxation reduces the number of iterations greatly, for a fine-tuned $\alpha$.
+	
+	
+	Most of the doubles and triples diagrams require one alignment. The $T_{3b-e}$-diagrams require an additional realignment in-between matrix products, as there is no possible arrangement of indices for all three matrices that allows for a matrix contraction. This realignment can be problematic when it comes to parallelisation, but we shall discuss this point further later on. In table \ref{Implementation | table | "alignments"}, we show all alignments as they have been implemented. It is important to remember that, even though a matrix has been aligned, the elements still need to appear in the correct positions for the matrix product to be correct. This is where the use of \emph{dictionaries}, or \emph{maps}, is important.\\
+	
+	\begin{table}[h]
+		\centering
+		\captionsetup{width=.8\textwidth}
+		\caption{The alignments, realignments (for $T_{3b-e}$), and product forms for the CCDT implementation. Symbols with $\tilde{a}$ are aligned, while those without are in their original form. Note that some diagrams require no ($L_a,\:L_b,\:Q_a$) or little ($T_{5f},\:T_{5g}$) alignment.}
+		\begin{tabular}{ccccc}
+			Diagram & Unaligned & Aligned & Realignment & Product \\ \hline
+			$L_a$ & $v_{ab}^{cd}t_{ij}^{cd}$ & $v_{ab}^{cd}t_{ij}^{cd}$ & & $A_{ij}^{ab}$\\
+			$L_b$ & $v_{kl}^{ij}t_{kl}^{ab}$ & $v_{kl}^{ij}t_{kl}^{ab}$ & & $A_{ij}^{ab}$\\
+			$L_c$ & $v_{ak}^{cj}t_{ik}^{cb}$ & $\tilde{v}_{aj}^{ck}\tilde{t}_{ck}^{ib}$ & & $\tilde{A}_{ib}^{aj}$\\
+			$Q_a$ & $t_{ij}^{cd}v_{kl}^{cd}t_{kl}^{ab}$ & $t_{ij}^{cd}v_{kl}^{cd}t_{kl}^{ab}$ & & $A_{ij}^{ab}$\\
+			$Q_b$ & $t_{ik}^{ca}v_{kl}^{cd}t_{jl}^{db}$ & $\tilde{t}_{kc}^{ai}\tilde{v}_{kc}^{dl}\tilde{t}_{jb}^{dl}$ & & $\tilde{A}_{jb}^{ai}$\\
+			$Q_c$ & $t_{kl}^{ca}v_{kl}^{cd}t_{ij}^{db}$ & $\tilde{t}_{klc}^{a}\tilde{v}_{klc}^{d}\tilde{t}_{ijb}^{d}$ & & $\tilde{A}_{ijb}^a$ \\
+			$Q_d$ & $t_{ik}^{cd}v_{kl}^{cd}t_{jl}^{ab}$ & $\tilde{t}_{i}^{cdk}\tilde{v}_{l}^{cdk}\tilde{t}_{l}^{abj}$ & & $\tilde{A}_{i}^{abj}$ \\
+			$D_{10b}$ & $v_{ak}^{cd}t_{ijk}^{cdb}$ & $\tilde{v}^{cdk}_{a}\tilde{t}_{ijb}^{cdk}$ & & $\tilde{A}_{ijb}^a$ \\
+			$D_{10c}$ & $v_{kl}^{jc}t_{ikl}^{cab}$ & $\tilde{v}_{klc}^{j}\tilde{t}_{klc}^{abi}$ & & $\tilde{A}_{j}^{abi}$ \\
+			$T_{1a}$ & $v_{bc}^{dk}t_{ij}^{ad}$ & $\tilde{v}_{bck}^{d}\tilde{t}_{ija}^{d}$ & & $\tilde{A}_{bck}^{ija}$ \\
+			$T_{1b}$ & $v_{lc}^{jk}t_{il}^{ab}$ & $\tilde{v}_{l}^{jkc}\tilde{t}_{l}^{abi}$ & & $\tilde{A}_{jkc}^{abi}$ \\
+			$T_{2c}$ & $v_{ab}^{de}t_{ijk}^{dec}$ & $\tilde{v}_{ab}^{de}\tilde{t}_{ijkc}^{de}$ & & $\tilde{A}_{ijkc}^{ab}$ \\
+			$T_{2d}$ & $v_{ij}^{lm}t_{lmk}^{abc}$ & $\tilde{v}_{ij}^{lm}\tilde{t}_{lm}^{abck}$ & & $\tilde{A}_{ij}^{abck}$ \\
+			$T_{2e}$ & $v_{id}^{al}t_{ljk}^{dbc}$ & $\tilde{v}_{ia}^{ld}\tilde{t}_{ld}^{bcjk}$ & & $\tilde{A}_{ia}^{bcjk}$ \\
+			$T_{3b}$ & $t_{il}^{ad}v_{de}^{bl}t_{jk}^{ec}$ & $\left(\tilde{t}_{ld}^{ai}\tilde{v}_{eb}^{ld}\right)t_{jk}^{ec}$ & $(\tilde{t}\tilde{v})_{bai}^{e}\tilde{t}_{jkc}^{e}$ & $\tilde{A}_{jkc}^{bai}$ \\
+			$T_{3c}$ & $t_{il}^{ad}v_{lm}^{jd}t_{mk}^{bc}$ & $\left(\tilde{t}_{ia}^{dl}\tilde{v}_{mj}^{dl}\right)t_{jk}^{ec}$ & $(\tilde{t}\tilde{v})_{ija}^{m}\tilde{t}_{m}^{bck}$ & $\tilde{A}_{ija}^{bck}$ \\
+			$T_{3d}$ & $t_{il}^{ab}v_{de}^{cl}t_{jk}^{de}$ & $t_{il}^{ab}\left(\tilde{v}_{de}^{cl}\tilde{t}_{jk}^{de}\right)$ & $\tilde{t}_{l}^{abi}(\tilde{v}\tilde{t})_{jkc}^{l}$ & $\tilde{A}_{jkc}^{abi}$ \\
+			$T_{3e}$ & $t_{ij}^{ad}v_{lm}^{kd}t_{lm}^{bc}$ & $\left(\tilde{t}_{ija}^{d}\tilde{v}_{lmk}^{d}\right)t_{lm}^{bc}$ & $(\tilde{t}\tilde{v})_{ijka}^{lm}\tilde{t}_{lm}^{bc}$ & $\tilde{A}_{ijka}^{bc}$ \\
+			$T_{5a}$ & $t_{il}^{ad}v_{lm}^{de}t_{mjk}^{ebc}$ & $\tilde{t}_{ia}^{dl}\tilde{v}_{me}^{dl}\tilde{t}_{me}^{bcjk}$ & & $\tilde{A}_{ia}^{bcjk}$ \\
+			$T_{5b}$ & $t_{li}^{de}v_{lm}^{de}t_{mjk}^{abc}$ & $\tilde{t}_{i}^{del}\tilde{v}_{m}^{del}\tilde{t}_{m}^{abcjk}$ & & $\tilde{A}_{i}^{abcjk}$ \\
+			$T_{5c}$ & $t_{lm}^{da}v_{lm}^{de}t_{ijk}^{ebc}$ & $\tilde{t}_{lmd}^{a}\tilde{v}_{lmd}^{e}\tilde{t}_{ijkbc}^{e}$ & & $\tilde{A}_{ijkbc}^{a}$ \\
+			$T_{5d}$ & $t_{ij}^{ad}v_{lm}^{de}t_{lmk}^{bec}$ & $\tilde{t}_{ija}^{d}\tilde{v}_{lme}^{d}\tilde{t}_{lme}^{bck}$ & & $\tilde{A}_{ija}^{bck}$ \\
+			$T_{5e}$ & $t_{il}^{ab}v_{lm}^{de}t_{jmk}^{dec}$ & $\tilde{t}_{l}^{abi}\tilde{v}_{l}^{dem}\tilde{t}_{jkc}^{dem}$ & & $\tilde{A}_{jkc}^{abi}$ \\
+			$T_{5f}$ & $t_{ij}^{de}v_{lm}^{de}t_{lmk}^{abc}$ & $t_{ij}^{de}v_{lm}^{de}\tilde{t}_{lm}^{abck}$ & & $\tilde{A}_{ij}^{abck}$ \\
+			$T_{5g}$ & $t_{lm}^{ab}v_{lm}^{de}t_{ijk}^{dec}$ & $t_{lm}^{ab}v_{lm}^{de}\tilde{t}_{ijkc}^{de}$ & & $\tilde{A}_{ab}^{ijkc}$
+		\end{tabular}
+		\label{Implementation | table | "alignments"}
+	\end{table}
+	
+	A dictionary is a object used in computing that, given some \emph{key}, returns a value. That is, we can make a dictionary $D$ that looks as
+	
+	\begin{center}
+	\begin{tabular}{cc}
+		key & value \\
+		car & 12 \\
+		candlestick & -17 \\
+		frumblesnuff & 34
+	\end{tabular}
+	\end{center}
+	
+	Now, if we call $D(\text{candlestick})$, we get back the value $-17$. Of course, the keys can be whatever we desire, like string, integers, floats, etc, and the same goes for the values. In our case, the keys will be unique identifiers for a set of states. For example, the $T_2$ amplitudes can be gotten for a set of states $i$, $j$, $a$, and $b$ by some unique identifier, 
+	
+	\begin{equation}
+		Id(i,j,a,b) = a + bN_p + iN_p^2 + jN_p^2N_h\:,
+	\end{equation}
+	
+	which will serve as integer keys. Obviously the amplitudes themselves will be floats, so the values of the map will be floats. This extends easily to all the other matrices as well. In C++, we use the standard library maps, which has the exact same functionality as dictionaries.\\
+	
+	Consider a dictionary $D$, that takes 6 arguments, $\{i,\:j,\:k,\:a,\:b,\:c\}$, and returns an index, which, when used together with an array that holds the $T_3$ amplitudes, gives us element $t_{ijk}^{abc}$. If we let $A$ be the array of amplitudes, then
+	
+	\begin{align}
+	D(i,j,k,a,b,c) &= I \\
+	A(I) = t_{ijk}^{abc}
+	\label{Implementation | eq | "T3 element retrieval"}
+	\end{align}
+	
+	Our matrices are constructed with the use of index matrices, such as those we explained previously. For example, the unaligned matrix $t_{ijk}^{abc}$ would have rows where each row is some selection $\{ijk\}$, where\footnote{Later on, when we start discussing index matrices, we shall be using phrases such as \texttt{ppmm\_hhpp} to signify which how we have done shift of unique identifiers. The notation means plus-plus-minus-minus for hole-hole-particle-particle, i.e. $+k_u(h1)+k_u(h2)-k_u(p1)-k_u(p2)$.}
+	
+	\begin{equation}
+	k_i+k_j+k_k = k_u
+	\end{equation}
+	
+	The columns would be the same, such that each column is some selection $\{abc\}$ where
+	
+	\begin{equation}
+	k_a+k_b+k_c = k_u
+	\end{equation}
+	
+	In order to insert the correct amplitude for a row and column, we have to find it in the amplitude array $A$. From the column and row, we can figure out which indices we have (due to the index matrices predefined), and insert them into the dictionary $D$, just like we described above. If we do this for the whole matrix, we will have constructed channel $k_u$ for the $T_3$ matrix.\\
+	
+	It should be apparent that this approach does not change with alignment. If we instead want to make a matrix in the shape of $t_{ij}^{abck}$, then while we will be working with another set of channels and index matrices, the approach is the same. However, since the CC diagrams contain no apparent repeated manner in which the index summations are done, it is difficult to make a general alignment function that places the amplitudes correctly in matrices for all diagrams. This is why, for our implementation, each diagram has its own matrix construction function. A golden rule when it comes to code writing is to never write repeated code, as the possibility of error increases with each line, but we found no way of avoiding it.\\
+	
+	This approach is the one used throughout our implementation. Although we will discuss the downsides of the use of dictionaries later on, we note that making a matrix from an array \emph{must} use some sort of search function, whether it is done through the std library, some other library, or our own search function, perhaps even in parallel. Such a search function will use time, and the most speedup to be gained in any implementation like this is by optimising the search function.
+	
+	\subsection{Permutations}
+	\label{Implementation | sec | "permutations"}
+	Most of the CC diagrams have permutations of indices. In the CCD diagrams, the possible permutations are $\hat{P}_{ij}$, $\hat{P}_{ab}$, and $\hat{P}_{ij}\hat{P}_{ab}$. This is not very many possible permutations, and they are quite simple to perform. That is, if we stored the terms from a diagram sum in a dictionary, we could perform a permutation by simply calling different elements of the sum. Assume we are calculating a diagram in some form
+	
+	\begin{equation}
+		t_{ij}^{ab} \leftarrow \hat{P}D_{ij}^{ab}\:,
+	\end{equation}
+	
+	where $D_{ij}^{ab}$ is the outcome of the summation of internal indices, and we have stored if as a map, say $M_D$, using the same identity function to generate keys as the one we use for the $T_2$ amplitude map. If now $\hat{P} = \hat{P}_{ab} = 1-P_{ab}$, then the permutation is simply
+	
+	\begin{equation}
+		t_{ij}^{ab} \leftarrow \left[D_{ij}^{ab} - D_{ij}^{ba}\right] \:,
+	\end{equation}
+	
+	where we find the two elements $D_{ij}^{ab}$, $D_{ij}^{ba}$ by
+	
+	\begin{align}
+		\begin{split}
+		D_{ij}^{ab} &= M_D\left(\text{id}(i,j,a,b)\right) \\
+		D_{ij}^{ba} &= M_D\left(\text{id}(i,j,b,a)\right)
+		\end{split}
+	\end{align}
+	
+	We have not bothered with a more optimised scheme with which to do the CCD permutations, since, as we have mentioned at the start of this chapter, the $T_2$ amplitudes are few in comparison to the $T_3$ amplitudes. This means that the $T_2$ diagram maps are much smaller and take much less time to search through, than the $T_3$ diagram maps. In CCDT, however, there are up to 4 permutation operators on a single diagrams. Take, for example, the diagram $T_{1a}$:
+	
+	\begin{align}
+		\begin{split}
+		T_{1a} :&= \hat{P}(a/bc)\hat{P}(k/ij)\sum_d \langle bc|| dk\rangle t_{ij}^{ad} \\
+		& = (1-\hat{P}_{ab} - \hat{P}_{ac})(1-\hat{P}_{ki}-\hat{P}_{kj})D_{ijk}^{abc} \\
+		&= \big[1-\hat{P}_{ab}-\hat{P}_{ac}-\hat{P}_{ki}-\hat{P}_{kj} \\
+		&\quad\quad\: + \hat{P}_{ab}\hat{P}_{ki} + \hat{P}_{ab}\hat{P}_{kj} + \hat{P}_{ac}\hat{P}_{ki} + \hat{P}_{ac}\hat{P}_{kj} \big]D_{ijk}^{abc}
+		\end{split}
+	\end{align}
+	
+	where $D_{ijk}^{abc}$ is the sum for some diagram. If we were still to use dictionaries to perform permutations, we would have to do as many search calls as there are terms in the equation above. As stated, we would like to minimise search calls as much as possible, so an alternate approach is better. In the process of writing, we attempted two different approaches, mostly out of necessity.\\
+	
+	The first approach consisted of storing the permutations beforehand. This is very memory intensive for aligned matrices\footnote{We would have to store all the permutations, for each diagram.}. Fortunately, if we use re-alignment of diagrams, i.e. write $\tilde{D}_{ija}^{cbk}$ as $D_{ijk}^{abc}$, we can simply store the permutations of columns and rows, since there will never be a permutation between hole- and particle-indices. Therefore, to do permutations on the amplitude contribution $\tilde{D}$, we use the dictionary to set all the elements of $\tilde{D}$ into a temporary, empty array\footnote{By empty, we mean all components are zero.} $A'$ in same layout as for the amplitude array $A$, meaning the element number $i$ in $A'$ has the same state indices as element $i$ in $A$. We then construct the direct channels $D$ using this temporary array. We have then effectively done a remapping
+	
+	\begin{equation}
+		\tilde{D}_{ija}^{cbk} \:\rightarrow\: D_{ijk}^{abc}
+	\end{equation}
+	
+	By now swapping the rows and columns of $D$, using some object telling us, for example, which rows go where if we interchange $i\leftrightarrow k$. To be specific, we can consider how to do this permutation, meaning we want to find $\hat{P}(ik)t_{ijk}^{abc} = t_{ijk}^{abc} - t_{kji}^{abc}$. Now, due to our whole channel regime, we cannot just change the indices in some 4- or 6-dimensional tensor. Instead, we need to interchange columns and rows in matrices, such if that two rows, $(i,j,k)$ and $(l,m,n)$, that become permuted as
+	
+	\begin{align}
+	(i,j,k) \quad&\overset{\hat{P}}{\longrightarrow}\quad (i',j',k') \\
+	(l,m,n) \quad&\overset{\hat{P}}{\longrightarrow}\quad (l',m',n')
+	\end{align}
+	
+	and fulfil
+	
+	\begin{align}
+	(i,j,k) &= (l',m',n') \\
+	(l,m,n) &= (i',j',k') \:,
+	\end{align}
+	
+	then we switch the two rows $(i,j,k)$ and $(l,m,n)$. In matrix form, such a permutation can, for example, be seen as
+	
+	\begin{equation*}
+	\begin{matrix}[cccc|cccccc]
+	&   &   & a & 10 & 9  & 15 & 11 & 17 & 14\\
+	&   &   & b & 11 & 14 & 14 & 18 & 23 & 15\\
+	&   &   & c & 16 & 17 & 13 & 20 & 20 & 23\\
+	i & j & k &   &    &    &    &    &    &   \\ \hline
+	0 & 1 & 2 & & a_{11} & a_{12} & a_{13} & a_{14} & a_{15} & a_{16}\\
+	0 & 2 & 1 & & a_{21} & a_{22} & a_{23} & a_{24} & a_{25} & a_{26}\\
+	1 & 0 & 2 & & a_{31} & a_{32} & a_{33} & a_{34} & a_{35} & a_{36}\\
+	1 & 2 & 0 & & a_{41} & a_{42} & a_{43} & a_{44} & a_{45} & a_{46}\\
+	2 & 0 & 1 & & a_{51} & a_{52} & a_{53} & a_{54} & a_{55} & a_{56}\\
+	2 & 1 & 0 & & a_{61} & a_{62} & a_{63} & a_{64} & a_{65} & a_{66}\\
+	\end{matrix}
+	\quad\overset{\hat{P}(ik)}{\longrightarrow}\quad
+	\begin{matrix}[cccc|cccccc]
+	&   &   & a & 10 & 9  & 15 & 11 & 17 & 14\\
+	&   &   & b & 11 & 14 & 14 & 18 & 23 & 15\\
+	&   &   & c & 16 & 17 & 13 & 20 & 20 & 23\\
+	k & j & i &   &    &    &    &    &    &   \\ \hline
+	2 & 1 & 0 & & a_{61} & a_{62} & a_{63} & a_{64} & a_{65} & a_{66}\\
+	1 & 2 & 0 & & a_{41} & a_{42} & a_{43} & a_{44} & a_{45} & a_{46}\\
+	2 & 0 & 1 & & a_{51} & a_{52} & a_{53} & a_{54} & a_{55} & a_{56}\\
+	0 & 2 & 1 & & a_{21} & a_{22} & a_{23} & a_{24} & a_{25} & a_{26}\\
+	1 & 0 & 2 & & a_{31} & a_{32} & a_{33} & a_{34} & a_{35} & a_{36}\\
+	0 & 1 & 2 & & a_{11} & a_{12} & a_{13} & a_{14} & a_{15} & a_{16}
+	\end{matrix}
+	\end{equation*}
+	
+	By adding these matrices, we will have calculated $\hat{P}(ik)t_{ijk}^{abc}$.\\
+	
+	The second approach consisted of assuming that every element in the diagram sums were some permutation for another element. To explicate, assume we have some diagram element $D_{ijk}^{abc}$. We know that, without permutation, this element contributes directly to the same amplitude, i.e.
+	
+	\begin{equation}
+		t_{ijk}^{abc} \leftarrow D_{ijk}^{abc}
+	\end{equation}
+	
+	However, we know\footnote{To realise this, go back to the way in which we do the $T_2$ permutations, and consider to what the map actually returns when we swap two indices.} that this element is also a $i\leftrightarrow j$ permutation of the element $D_{i'j'k'}^{a'b'c'}$, where
+	
+	\begin{align}
+	\begin{split}
+	i &= j' \\
+	j &= i' \\
+	k &= k'
+	\end{split}
+	\end{align}
+	
+	In other words, we may use
+	
+	\begin{align}
+		\begin{split}
+		t_{i'j'k'}^{a'b'c'} &= \hat{P}(ik)D_{i'j'k'}^{a'b'c'} \\
+		&= D_{i'j'k'}^{a'b'c'} - D_{ijk}^{abc}
+		\end{split}
+	\end{align}
+	
+	At first, this might seem utterly pointless, since we would have to search through all the $D$ elements to find $D_{ijk}^{abc}$, when working with $D_{i'j'k'}^{a'b'c'}$. However, knowing that this specific diagram has a permutation of $i$ and $j$, we can, when going through all the elements of $D$, simply let each element $D_{ijk}^{abc}$ contribute to both\footnote{It is important to be mindful of signs when doing this. Each swap of indices gives a minus sign.} $t_{ijk}^{abc}$ and $t_{jik}^{abc}$. Mathematically, this approach is show by
+	
+	\begin{align}
+		\begin{split}
+			t_{ijk}^{abc} &\leftarrow \hat{P}(ik) D_{ijk}^{abc} \\
+			\underset{\hat{P}(ik)\big|}{\longrightarrow}\quad \hat{P}(ik)t_{ijk}^{abc} &\leftarrow \hat{P}^2(ik)D_{ijk}^{abc} = D_{ijk}^{abc}
+		\end{split}
+	\end{align}
+	
+	The latter approach is nice in the sense that we need not do any sort of remapping, but it is at the cost of having to do another map search per permutation operator, per diagram element. However, it is problematic when it comes to parallellisation. Since we, ultimately, would like to work on channels in parallel, the second approach means we might try to write to the same element from several processes. We will discuss parallellisation in more depth below.
+	
+	\section{Parallelisation}
+	Parallelisation is a necessity for CCDT, even for the most efficient implementations, simply due to the immense increase in computational time and memory requirements when we move up in system size. There are two options for C++ when it comes to parallelisation, one being use of MP (multi-processing) and the other being MPI (multi-processing interface). We have attempted both options as a means of speedup, but found complications in both cases, which severely limited the use of parallel computation.\\
+	
