@@ -1,42 +1,62 @@
-\documentclass[a4paper,10pt, twocolumn]{article}
+\documentclass[aip,jcp,reprint,floatfix]{revtex4-1}
+
+\usepackage{amsmath,amssymb}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{dcolumn}
+\usepackage{bbold}
+\usepackage{natbib}
+\usepackage[normalem]{ulem} % to strike out plain text
+\usepackage[colorlinks=true,citecolor={blue},urlcolor={blue}, linkcolor=blue]{hyperref}%
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath}
 \usepackage{amsthm}
-\usepackage{amssymb}
 \usepackage{braket}
 \usepackage{verbatim}
-\usepackage{mdframed} %nice frames
-\usepackage[hidelinks]{hyperref}
-\usepackage{cite}
-\usepackage[toc,page]{appendix}
+\usepackage{mdframed}
 \newtheorem{theorem}{Theorem}
-\renewcommand{\thesection}{\Roman{section}}
-\renewcommand\thesubsection{\Alph{subsection}}
-%opening
-\title{Article}
-\author{Kristiansen, Håkon Emil}
+
 
 \begin{document}
+
+
+\title{Time-dependent optimized coupled-cluster method for multielectron dynamics}
+
+\author{Håkon Emil Kristiansen}
+\email[Electronic mail:]{haakoek@student.matnat.uio.no}
+\affiliation{Department of Physics, University of Oslo, N-0316 Oslo, Norway}
+
+
+\begin{abstract}
+We present a working implementation of a simplified version of the
+orbital-adaptive time-dependent coupled-cluster method which we refer
+to as just the time-dependent coupled-cluster (TDCC) method.
+OATDCC/TDCC approximates solutions to the quantum $N$-body problem and
+for $N=2$ TDCC is equivalent to the time-dependent
+configuration-interaction method (TDCI).  A TDCI solver is implemented
+and shown to be correct by comparing with a previous study and is then
+used as a foundation for verifying the implementation of the TDCC
+method. For one and two dimensional quantum dot systems with $N=2$ we
+demonstrate that the methods are equal to numerical
+precision. Furthermore, for a small number of basis functions we use
+the TDCC solver to compute the time evolution of six-electron
+isotropic quantum dot.
+\end{abstract}
+
+\pacs{32.80.Rm, 31.15.A-, 42.65.Ky}
 
 \maketitle
 
 
-\begin{abstract}
-We present a working implementation of a simplified version of the orbital-adaptive time-dependent coupled-cluster method which we refer to as 
-just the time-dependent coupled-cluster (TDCC) method.  OATDCC/TDCC approximates solutions to the quantum $N$-body problem 
-and for $N=2$ TDCC is equivalent to the time-dependent configuration-interaction method (TDCI). 
-A TDCI solver is implemented and shown to be correct by comparing with a previous study 
-and is then used as a foundation for verifying the implementation of the TDCC method. For one and two dimensional quantum dot 
-systems with $N=2$ we demonstrate that the methods are equal to numerical precision. Furthermore, for a small number of basis functions we use the TDCC solver 
-to compute the time evolution of six-electron isotropic quantum dot.  
-\end{abstract}
 
-%\tableofcontents
 
 \section{Introduction}
-Quantum mechanics is a theory that describes/models the properties of microscopic systems. It postulates that given the so-called wavefunction, $\Psi(\mathbf{r},t)$, we can 
-in principle compute all that there is to know about the system. 
-Given suitable initial conditions $\Psi(\mathbf{r},t)$ can be determined for all future time by solving the time-dependent Schrödinger equation (TDSE),
+
+Quantum mechanics is a theory that describes/models the properties of
+microscopic systems. It postulates that given the so-called
+wavefunction, $\Psi(\mathbf{r},t)$, we can in principle compute all
+that there is to know about the system.  Given suitable initial
+conditions $\Psi(\mathbf{r},t)$ can be determined for all future time
+by solving the time-dependent Schrödinger equation (TDSE),
 \begin{equation}
  i \hbar \frac{\partial }{\partial t} \Psi(\mathbf{r},t) = \hat{H} \Psi(\mathbf{r},t).
 \end{equation}
@@ -45,38 +65,63 @@ time-independent Schrödinger (TISE) equation
 \begin{equation}
  \hat{H} \Psi(\mathbf{r}) = E \Psi(\mathbf{r}).
 \end{equation}
-Exact/analytical solutions to the TISE is possible only for the simplest systems and general solutions to the TDSE is even rarer. Thus, 
-one must resort to approximative/numerical methods. Of particular interest is the so-called many-body problem where one considers systems of a large number of interacting particles, 
-where large can be anywhere from two to infinity. 
+Exact/analytical solutions to the TISE is possible only for the
+simplest systems and general solutions to the TDSE is even
+rarer. Thus, one must resort to approximative/numerical methods. Of
+particular interest is the so-called many-body problem where one
+considers systems of a large number of interacting particles, where
+large can be anywhere from two to infinity.
 
-Several approaches for solving the many-body TISE numerically/approximatively has been devised such as Hartree-Fock (HF), Density Functional Theory (DFT), 
-Configuration Interaction (CI) and Coupled Cluster (CC). While efficient, Hartree-Fock and DFT 
-are insufficient if one wants a high degree of accuracy. Configuration Interaction and Coupled Cluster methods are hierarchical in the sense that one can 
-systematically construct increasly accurate approximations. If the CI method is not truncated we have what is known as Full Configuration Interaction (FCI). FCI 
-can be seen as exact (within some finite space), however it suffers from exponential scaling. Truncated CI methods which would achieve polynomial scaling 
-are problematic since they are not size-consistent and extensive. Truncated CC methods one the other hand are size-consistent and extensive and achieves polynomial 
-scaling. Due to this fact Coupled Cluster is considered the gold standard of many-body techniques if high accuracy is desired. 
+Several approaches for solving the many-body TISE
+numerically/approximatively has been devised such as Hartree-Fock
+(HF), Density Functional Theory (DFT), Configuration Interaction (CI)
+and Coupled Cluster (CC). While efficient, Hartree-Fock and DFT are
+insufficient if one wants a high degree of accuracy. Configuration
+Interaction and Coupled Cluster methods are hierarchical in the sense
+that one can systematically construct increasly accurate
+approximations. If the CI method is not truncated we have what is
+known as Full Configuration Interaction (FCI). FCI can be seen as
+exact (within some finite space), however it suffers from exponential
+scaling. Truncated CI methods which would achieve polynomial scaling
+are problematic since they are not size-consistent and
+extensive. Truncated CC methods one the other hand are size-consistent
+and extensive and achieves polynomial scaling. Due to this fact
+Coupled Cluster is considered the gold standard of many-body
+techniques if high accuracy is desired.
 
-Similarly, there exists different approximations to the solution of the TDSE with 
-the Multiconfiguration Time-Dependent Hartree-Fock method (MCTDHF) being considered the most accurate. MCTDHF, which is combination of CI and HF generalized to 
-the time domain, suffers from exponential scaling. In a recent article \cite{Kvaal12}, Simen Kvaal proposes a method based on Coupled-Cluster theory, 
-the so-called Orbital Adaptive Time Dependent Coupled Cluster method (OATDCC), which is a hierarchical approximation to the MCTDHF method. The OATDCC inherits 
-size-consisteny and extensivity from the CC method and achieves polynomial scaling. 
+Similarly, there exists different approximations to the solution of
+the TDSE with the Multiconfiguration Time-Dependent Hartree-Fock
+method (MCTDHF) being considered the most accurate. MCTDHF, which is
+combination of CI and HF generalized to the time domain, suffers from
+exponential scaling. In a recent article \cite{Kvaal12}, Simen Kvaal
+proposes a method based on Coupled-Cluster theory, the so-called
+Orbital Adaptive Time Dependent Coupled Cluster method (OATDCC), which
+is a hierarchical approximation to the MCTDHF method. The OATDCC
+inherits size-consisteny and extensivity from the CC method and
+achieves polynomial scaling.
+
 \section{Theory/Formalism}
 \subsection{The model Hamiltonian}
-We shall model the quantum dot systems as a collection of $N$ nonrelativistic electrons of mass $m$ in $d$-dimensional space trapped by a confining potential 
-$v_{\text{conf}}(\mathbf{\hat{r}})$. Here $\hat{\mathbf{r}}$ is the position operator in $d$-dimensional space 
+We shall model the quantum dot systems as a collection of $N$
+nonrelativistic electrons of mass $m$ in $d$-dimensional space trapped
+by a confining potential $v_{\text{conf}}(\mathbf{\hat{r}})$. Here
+$\hat{\mathbf{r}}$ is the position operator in $d$-dimensional space
 \begin{equation}
  \hat{\mathbf{r}} \equiv \sum_{i=1}^d \hat{\mathbf{x}}_i \hat{\mathbf{e}}_i
 \end{equation}
 with $\hat{\mathbf{e}}_i$ a unit vector.
 
-The electrons interact through the Coulomb interaction $e^2/(4\pi \epsilon R)$, where $e$ is the electron charge, $\epsilon$ the permitivity of the medium and $R$ is the 
-distance between two interacting electrons.
+The electrons interact through the Coulomb interaction $e^2/(4\pi
+\epsilon R)$, where $e$ is the electron charge, $\epsilon$ the
+permitivity of the medium and $R$ is the distance between two
+interacting electrons.
 
-For convenience, we will use atomic untis, chosen such that $\hbar \equiv m \equiv e \equiv 4\pi \epsilon \equiv 1$. Thus, all energies are presented in hartrees per $\hbar$.
+For convenience, we will use atomic untis, chosen such that $\hbar
+\equiv m \equiv e \equiv 4\pi \epsilon \equiv 1$. Thus, all energies
+are presented in hartrees per $\hbar$.
 
-In atomic units, the many-body problem is described by the Hamiltonian on second quantized form
+In atomic units, the many-body problem is described by the Hamiltonian
+on second quantized form
 \begin{align}
  \hat{H} = \hat{H}_1 + \hat{H}_2 = &\sum_{pq} \braket{p|\hat{h}_0|q}\hat{a}_p^\dagger\hat{a}_q \nonumber \\
  + \frac{1}{4}&\sum_{pqrs}\braket{pq|\hat{u}|rs}_{\text{AS}}\hat{a}_p^\dagger\hat{a}_q^\dagger\hat{a}_s\hat{a}_r \label{FieldFreeHamiltonian}
@@ -87,18 +132,26 @@ The operator $\hat{h}_0$ is the single-particle Hamiltonian
 \begin{equation}
  \hat{h}_0 = -\frac{1}{2}\nabla^2 + v_{\text{conf}}(\mathbf{\hat{r}})
 \end{equation}
-while $\hat{u}$ represents the Coulomb interaction. Here $\ket{p}$ is a single-particle basis function which in its position representation is given by
+while $\hat{u}$ represents the Coulomb interaction. Here $\ket{p}$ is
+a single-particle basis function which in its position representation
+is given by
 \begin{equation}
  \braket{\mathbf{r}|p} \equiv \phi_p(\mathbf{r}).
 \end{equation}
-In practice, we have to choose some single-particle basis to compute within. One typical choice is to take the single-particle basis to be the eigenfunctions of $\hat{h}_0$ such that 
+In practice, we have to choose some single-particle basis to compute
+within. One typical choice is to take the single-particle basis to be
+the eigenfunctions of $\hat{h}_0$ such that
 \begin{equation}
  \hat{h}_0 \ket{p} = \epsilon_p \ket{p},
 \end{equation}
 where $\epsilon_p$ is the corresponding eigenvalue.
 
-The quantities $\braket{p|\hat{h}_0|q}$ and $\braket{pq|\hat{u}|rs}_{\text{AS}}$ are referred to as \textit{matrix elements} and must 
-be computed relative to the chosen single-particle basis. In particular, $\braket{pq|\hat{u}|rs}_{\text{AS}}$ are \textit{antisymmetrized} matrix elements, defined  by 
+The quantities $\braket{p|\hat{h}_0|q}$ and
+$\braket{pq|\hat{u}|rs}_{\text{AS}}$ are referred to as \textit{matrix
+  elements} and must be computed relative to the chosen
+single-particle basis. In particular,
+$\braket{pq|\hat{u}|rs}_{\text{AS}}$ are \textit{antisymmetrized}
+matrix elements, defined by
 \begin{equation}
  \braket{pq|\hat{u}|rs}_{\text{AS}} \equiv u^{pq}_{rs} - u^{pq}_{sr}
 \end{equation}
@@ -106,9 +159,13 @@ where $u^{pq}_{rs}$ is the interaction integral,
 \begin{equation}
  u^{pq}_{rs} \equiv \int \phi^*_p(\mathbf{r}_1) \phi^*_q(\mathbf{r}_2) \hat{u}(\mathbf{r}_1,\mathbf{r}_2) \phi_r(\mathbf{r}_1)\phi_s(\mathbf{r}_2) d\mathbf{r}_1 d\mathbf{r}_2.
 \end{equation}
-In the rest of this paper we will drop the subscript AS for the antisymmetrized matrix elements. 
+In the rest of this paper we will drop the subscript AS for the
+antisymmetrized matrix elements.
 
-In order to generate dynamics the electrons are coupled to a time dependent monochromatic laser field, with frequency $\omega$ and amplitude $\mathcal{E}_0$, polarized along the $x$-axis \cite{Zanghellini04}
+In order to generate dynamics the electrons are coupled to a time
+dependent monochromatic laser field, with frequency $\omega$ and
+amplitude $\mathcal{E}_0$, polarized along the $x$-axis
+\cite{Zanghellini04}
 \begin{equation}
  v_{\text{laser}}(\mathbf{\hat{r},t}) = \hat{\mathbf{x}}_1 \mathcal{E}_0 \sin(\omega t),
 \end{equation}
@@ -123,37 +180,56 @@ The total time dependent Hamiltonian of the system is then given by
  \hat{H}(t) = &\sum_{pq} \braket{p|\hat{h}_t|q}\hat{a}_p^\dagger\hat{a}_q \nonumber \\
  + \frac{1}{4}&\sum_{pqrs}\braket{pq|\hat{u}|rs}_{\text{AS}}\hat{a}_p^\dagger\hat{a}_q^\dagger\hat{a}_s\hat{a}_r.
 \end{align}
-It is important to note that this implies that we have to update the matrix elements $\braket{p|\hat{h}_t|q}$ during the simulation. However, in this work we consider only methods where 
-the single-particle basis is held fixed in time, hence the two-body matrix elements can be computed $\braket{pq|\hat{u}|rs}$ once and for all.
+It is important to note that this implies that we have to update the
+matrix elements $\braket{p|\hat{h}_t|q}$ during the
+simulation. However, in this work we consider only methods where the
+single-particle basis is held fixed in time, hence the two-body matrix
+elements can be computed $\braket{pq|\hat{u}|rs}$ once and for all.
 
-We will handle the time dependent problem in two steps. First we prepare a system in its groundstate by solving the time independent Schrödinger equation (TISE) for the field-free Hamiltonian \eqref{FieldFreeHamiltonian}. 
-Then we apply the time dependent laser field and compute the time evolution from the time dependent Schrödinger equation (TDSE). 
-Before we discuss the metods for solving the TISE and TDSE respectively we will adress the choice of single-particle basis.
+We will handle the time dependent problem in two steps. First we
+prepare a system in its groundstate by solving the time independent
+Schrödinger equation (TISE) for the field-free Hamiltonian
+\eqref{FieldFreeHamiltonian}.  Then we apply the time dependent laser
+field and compute the time evolution from the time dependent
+Schrödinger equation (TDSE).  Before we discuss the metods for solving
+the TISE and TDSE respectively we will adress the choice of
+single-particle basis.
 
 \subsection{Choice of single-particle basis}
-The choice of single-particle basis will in general depend on the problem. In quantum chemistry it is customary to expand the eigenfunctions, $\{ \psi_k \}$, 
-of $\hat{h}_0$ in (non-orthogonal) Gaussian basis functions
-$g_p(\mathbf{r})$
+The choice of single-particle basis will in general depend on the
+problem. In quantum chemistry it is customary to expand the
+eigenfunctions, $\{ \psi_k \}$, of $\hat{h}_0$ in (non-orthogonal)
+Gaussian basis functions $g_p(\mathbf{r})$
 \begin{equation}
  \hat{h}_0 \ket{\psi_k} = \hat{h}_0 \sum_{p=1}^L g_p(\mathbf{r}) = \epsilon_k \sum_{p=1}^L g_p(\mathbf{r})
 \end{equation}
-resulting in a generalized eigenvalue problem which must be solved for the eigenfunctions. Ideally we would let $L \rightarrow \infty$ but must be taken as finite in practice. 
-The choice of Gaussian basis functions is popular due to the fact that matrix elemtents can be evaluated efficiently \cite{Helgaker00book}.
+resulting in a generalized eigenvalue problem which must be solved for
+the eigenfunctions. Ideally we would let $L \rightarrow \infty$ but
+must be taken as finite in practice.  The choice of Gaussian basis
+functions is popular due to the fact that matrix elemtents can be
+evaluated efficiently \cite{Helgaker00book}.
 
-Another popular choice, which is the one chosen in this work, is to use the eigenfunctions of the Harmonic oscillator (HO) 
+Another popular choice, which is the one chosen in this work, is to
+use the eigenfunctions of the Harmonic oscillator (HO)
 \begin{equation}
  \left(-\frac{1}{2}\nabla^2 + \frac{1}{2} \omega_{\text{HO}}\hat{\mathbf{r}}^2 \right) \phi_k(\mathbf{r}) = \epsilon_k \phi_k(\mathbf{r})  
 \end{equation}
-as a single-particle basis. The solutions to the HO-problem is well known and the eigenfunctions have closed form expressions. 
+as a single-particle basis. The solutions to the HO-problem is well
+known and the eigenfunctions have closed form expressions.
 
-Of particular importance for our purposes is the fact that the interaction integrals
+Of particular importance for our purposes is the fact that the
+interaction integrals
 \begin{equation}
  u^{pq}_{rs} \equiv \int \phi^*_p(\mathbf{r}_1) \phi^*_q(\mathbf{r}_2) \hat{u}(\mathbf{r}_1,\mathbf{r}_2) \phi_r(\mathbf{r}_1)\phi_s(\mathbf{r}_2) d\mathbf{r}_1 d\mathbf{r}_2
 \end{equation}
-can be solved analytically in two- and three-dimensions, using HO-basis functions in polar and spherical coordinates respectively \cite{Anisimovas98, Vorrath2003}. If the confining potential 
-is chosen to be the Harmonic oscillator potential we are essentially done and can move on to the many-body treatment of the problem.
+can be solved analytically in two- and three-dimensions, using
+HO-basis functions in polar and spherical coordinates respectively
+\cite{Anisimovas98, Vorrath2003}. If the confining potential is chosen
+to be the Harmonic oscillator potential we are essentially done and
+can move on to the many-body treatment of the problem.
 
-Additionally we may approximate the eigenfunctions of more general confining potentials by expanding the solutions in the HO-functions. 
+Additionally we may approximate the eigenfunctions of more general
+confining potentials by expanding the solutions in the HO-functions.
 
 Consider the general problem
 \begin{equation}
@@ -167,7 +243,8 @@ Expand the eigenfunctions $\ket{\psi_k}$ in the HO-functions $\ket{\phi_p}$
 \begin{equation}
  \ket{\psi_k} = \sum_{p=1}^L c_{p,k} \ket{\phi_p} 
 \end{equation}
-and insert into Eq.\eqref{EigenfuncEq}. Left-projection with $\bra{\phi_q}$ results in the following expression
+and insert into Eq.\eqref{EigenfuncEq}. Left-projection with
+$\bra{\phi_q}$ results in the following expression
 \begin{equation}
  \sum_{p=1}^L c_{p,k} \braket{\phi_q|\hat{h}_0|\phi_p} = \epsilon_k \sum_{p=1}^L c_{p,k} \delta_{q,p}
 \end{equation}
@@ -175,27 +252,40 @@ where we have used the orthogonality of the HO-functions. This can be written on
 \begin{equation}
  HC = C\mathcal{E}
 \end{equation}
-where $H_{qp} \equiv \braket{\phi_q|\hat{h}_0|\phi_p}$, $\mathcal{E}$ is a diagonal matrix containing the eigenvalues on its diagonal, and $C$ is matrix conatining 
-the expansions coefficients for basis function $k$ in its columns. The eigenproblem must be solved for the expansions coefficients, resulting in a approximation of the interaction integrals 
-in terms of the known intercation integrals $\braket{\phi_\alpha \phi_\beta|\hat{u}|\phi_\gamma \phi_\delta}$ given by 
+where $H_{qp} \equiv \braket{\phi_q|\hat{h}_0|\phi_p}$, $\mathcal{E}$
+is a diagonal matrix containing the eigenvalues on its diagonal, and
+$C$ is matrix conatining the expansions coefficients for basis
+function $k$ in its columns. The eigenproblem must be solved for the
+expansions coefficients, resulting in a approximation of the
+interaction integrals in terms of the known intercation integrals
+$\braket{\phi_\alpha \phi_\beta|\hat{u}|\phi_\gamma \phi_\delta}$
+given by
 \begin{equation}
  \braket{\psi_p \psi_q| \hat{u}| \psi_r \psi_s} = \sum_{\alpha \beta \gamma \delta} c^*_{p,\alpha} c^*_{q,\beta} c^*_{r,\gamma} c^*_{s,\delta} \braket{\phi_\alpha \phi_\beta|\hat{u}|\phi_\gamma \phi_\delta}.
 \end{equation}
 
-The quality of such an approximation will naturally depend on how close the confining potential is to the Harmonic oscillator potential. Nevertheless it constitutes a convenient starting point for 
+The quality of such an approximation will naturally depend on how
+close the confining potential is to the Harmonic oscillator
+potential. Nevertheless it constitutes a convenient starting point for
 investigations of more general potentials.
 
 \subsection{Configuration interaction theory}
 
 \subsubsection{Time independent Configuration interaction}
-The conceptually simplest method for solving the many-problem is probably that of Configuration interaction (CI). 
+The conceptually simplest method for solving the many-problem is
+probably that of Configuration interaction (CI).
 
 Let us first consider the time independent Schrödinger equation 
 \begin{equation}
  \hat{H} \ket{\Psi_k} = E_k \ket{\Psi_k}
 \end{equation}
-where $\hat{H}$ is the field-free Hamiltonian given by Eq. \eqref{FieldFreeHamiltonian}, $\ket{\Psi_k}$ is the many-body eigenfunction and $E_k$ its corresponding eigenvalue. It is customary 
-to use a (finite in practice) basis of orthogonal Slater determinants (SD), $\{ \Phi_p \}_{p=1}^{N_{\text{sd}}}$ where $N_{\text{sd}}$ is the number of determinants, built from the single-particle basis functions described in the previous section. 
+where $\hat{H}$ is the field-free Hamiltonian given by
+Eq. \eqref{FieldFreeHamiltonian}, $\ket{\Psi_k}$ is the many-body
+eigenfunction and $E_k$ its corresponding eigenvalue. It is customary
+to use a (finite in practice) basis of orthogonal Slater determinants
+(SD), $\{ \Phi_p \}_{p=1}^{N_{\text{sd}}}$ where $N_{\text{sd}}$ is
+the number of determinants, built from the single-particle basis
+functions described in the previous section.
 
 The principal idea of CI is to expand the wavefunction in the SD-basis
 \begin{equation}
@@ -205,52 +295,84 @@ If we left-project with $\bra{\Phi_q}$ the above equation can be written on matr
 \begin{equation}
  HC = CE
 \end{equation}
-where $H_{qp} \equiv \braket{\Phi_q|\hat{H}|\Phi_p}$, $E$ is a diagonal matrix with the eigenvalues along its diagonal and $C$ is a matrix containing the expansion coefficients of the 
-$k$-th eigenfunction in column $k$. Thus if we can compute the matrix elements $H_{qp}$ the TISE can be solved by numerical diagonalization.
+where $H_{qp} \equiv \braket{\Phi_q|\hat{H}|\Phi_p}$, $E$ is a
+diagonal matrix with the eigenvalues along its diagonal and $C$ is a
+matrix containing the expansion coefficients of the $k$-th
+eigenfunction in column $k$. Thus if we can compute the matrix
+elements $H_{qp}$ the TISE can be solved by numerical diagonalization.
 
-The evaluation of $H_{qp}$ is simplified by what is known as the Slater-Condon rules. If $\ket{\Phi}$ is any SD, 
-the only non-zero contributions to $H$ are given by
+The evaluation of $H_{qp}$ is simplified by what is known as the
+Slater-Condon rules. If $\ket{\Phi}$ is any SD, the only non-zero
+contributions to $H$ are given by
 \begin{align}
  \braket{\Phi| \left(\hat{H}_1 + \hat{H}_2\right)|\Phi} &= \sum_i \braket{i|\hat{h}_0|i} + \frac{1}{2}\sum_{ij}\braket{ij|\hat{u}|ij} \label{SlaterCondonEqual}\\
  \braket{\Phi| \left(\hat{H}_1 + \hat{H}_2\right)|\Phi_k^c} &= \braket{k|\hat{h}_0|c} + \sum_{i} \braket{ki|\hat{u}|ci} \label{SlaterCondonDiffByOne} \\
  \braket{\Phi| \left(\hat{H}_1 + \hat{H}_2\right)|\Phi_{kl}^{cd}} &= \braket{kl|\hat{u}|cd} \label{SlaterCondonDiffByTwo}.
 \end{align}
-In other words, we only have to consider the overlap between determinants that differ by at most two occupied single-particle functions. 
-Here we use the convention that $i,j,k,l = 1,...,N$, with $N$ being the number of electrons and $a,b,c,d = N+1,...$ and $p,q,r,s = 1,...,L$. Thus, 
-we see that if the matrix elements $\braket{p|\hat{h}_0|q}$ and $\braket{pq|\hat{u}|rs}$ are known we can set up the Hamilton matrix and diagonalize it, obtaining the expansion coefficients $C$.
+In other words, we only have to consider the overlap between
+determinants that differ by at most two occupied single-particle
+functions.  Here we use the convention that $i,j,k,l = 1,...,N$, with
+$N$ being the number of electrons and $a,b,c,d = N+1,...$ and $p,q,r,s
+= 1,...,L$. Thus, we see that if the matrix elements
+$\braket{p|\hat{h}_0|q}$ and $\braket{pq|\hat{u}|rs}$ are known we can
+set up the Hamilton matrix and diagonalize it, obtaining the expansion
+coefficients $C$.
 
-Ideally we would like $N_{\text{sd}} \rightarrow \infty$ which is impossible in practice. If we choose a finite number, $L$, of single-particle basis functions and use all the linearly independent 
-Slater determinants we can build from this basis we get what is known as the Full Configuration Interaction (FCI). However, the problem with FCI is that the number of linearly independent 
-determinants are given by 
+Ideally we would like $N_{\text{sd}} \rightarrow \infty$ which is
+impossible in practice. If we choose a finite number, $L$, of
+single-particle basis functions and use all the linearly independent
+Slater determinants we can build from this basis we get what is known
+as the Full Configuration Interaction (FCI). However, the problem with
+FCI is that the number of linearly independent determinants are given
+by
 \begin{equation}
  N_{\text{sd}} = \binom{L}{N}
 \end{equation}
-with $N$ being the number of electrons. This means that the numbers of SD's becomes huge very fast, making FCI practical/feasible only for the smallest systems. On the other hand, FCI is exact within 
-a given computational space, thus it is an invaluable tool in aiding us determining the validity of more sophisticated methods. Furthermore, CI is variational in the sense that it guarantees an upper bound 
-on the groundstate energy. 
+with $N$ being the number of electrons. This means that the numbers of
+SD's becomes huge very fast, making FCI practical/feasible only for
+the smallest systems. On the other hand, FCI is exact within a given
+computational space, thus it is an invaluable tool in aiding us
+determining the validity of more sophisticated methods. Furthermore,
+CI is variational in the sense that it guarantees an upper bound on
+the groundstate energy.
 
-One way to adress the problems with FCI is to consider a \textit{reference} determinant $\ket{\Phi}$, typically taken to be the Hartree-Fock state, and consider excitations upon this state. That is, 
+One way to adress the problems with FCI is to consider a
+\textit{reference} determinant $\ket{\Phi}$, typically taken to be the
+Hartree-Fock state, and consider excitations upon this state. That is,
 we make the ansatz
 \begin{equation}
  \ket{\Psi} = A_0 \ket{\Phi} + \sum_{ia} A_{ia} \ket{\Phi_{i}^a} + \frac{1}{4} \sum_{ijab} A_{ijab} \ket{\Phi_{ij}^{ab}} + \cdots
 \end{equation}
-where $\ket{\Phi_i^a}$ is a singly-excited determinant, $\ket{\Phi_{ij}^{ab}}$ doubly-excited etc. and truncate at some excitation level. 
-This results in a hierarchy of approximations known as CIS (only single-excitations), CID (only double-excitations), CISD (singles and doubles and so on. In this way one obtains polynomial 
-scaling of the number of determinants. The problem with this approach is that the truncated CI-wavefunction is not size-consistent and extensive \cite{Helgaker00book}. It turns out 
-that this problem is resolved by the Coupled Cluster method, which makes it the de facto standard of many-body methods today.
+where $\ket{\Phi_i^a}$ is a singly-excited determinant,
+$\ket{\Phi_{ij}^{ab}}$ doubly-excited etc. and truncate at some
+excitation level.  This results in a hierarchy of approximations known
+as CIS (only single-excitations), CID (only double-excitations), CISD
+(singles and doubles and so on. In this way one obtains polynomial
+scaling of the number of determinants. The problem with this approach
+is that the truncated CI-wavefunction is not size-consistent and
+extensive \cite{Helgaker00book}. It turns out that this problem is
+resolved by the Coupled Cluster method, which makes it the de facto
+standard of many-body methods today.
 
 \subsubsection{Time dependent Configuration interaction}
-Another advantage with CI is that it is straightforward to generalize to time dependent problems. Recall that the time evolution of an  
-arbitrary state, $\ket{\Psi(t)}$ with initial condition $\ket{\Psi(t_0)}$, is given by the time dependent Schrödinger equation, 
+Another advantage with CI is that it is straightforward to generalize
+to time dependent problems. Recall that the time evolution of an
+arbitrary state, $\ket{\Psi(t)}$ with initial condition
+$\ket{\Psi(t_0)}$, is given by the time dependent Schrödinger
+equation,
 \begin{equation}
  i \hbar \frac{\partial}{\partial t}\ket{\Psi(t)} = \hat{H}(t) \ket{\Psi(t)}.
 \end{equation}
-We will take the initial condition to be some (normalized) linear combination of the CI eigenfunctions. In particular, we are interested in the 
-time evolution of the groundstate.
+We will take the initial condition to be some (normalized) linear
+combination of the CI eigenfunctions. In particular, we are interested
+in the time evolution of the groundstate.
 
-The time-dependent Configuration Interaction (TDCI) method is obtained by placing a time-dependence on 
-the expansion coefficients in the CI-wavefunction while keeping the single-particle basis fixed. Analogous to what we did in the previous section, we 
-expand $\ket{\Psi(t)}$ in a given orthonormal Slater determinant basis $\{ \Phi_p\}_{p=1}^{N_{\text{sd}}}$
+The time-dependent Configuration Interaction (TDCI) method is obtained
+by placing a time-dependence on the expansion coefficients in the
+CI-wavefunction while keeping the single-particle basis
+fixed. Analogous to what we did in the previous section, we expand
+$\ket{\Psi(t)}$ in a given orthonormal Slater determinant basis $\{
+\Phi_p\}_{p=1}^{N_{\text{sd}}}$
 \begin{equation}
  \ket{\Psi(t)} = \sum_{p=1}^{N_{\text{sd}}} A_p(t) \ket{\Phi_p}.
 \end{equation}
@@ -258,9 +380,10 @@ If we now insert this expansion into the time-dependent Schrödinger equation we
 \begin{equation}
  i \hbar  \sum_{p=1}^{N_{\text{sd}}} \frac{\partial A_p(t)}{\partial t} \ket{\Phi_p} =  \sum_{p=1}^{N_{\text{sd}}} A_p(t) \hat{H}(t) \ket{\Phi_p}. 
 \end{equation}
-Left-projecting the above equation with $\bra{\Phi_q}$ and using the orthonormality of the Slater determinants, 
-we are left with a differential equation for each expansion coefficient $A_J(t)$
-which can be written as the matrix-vector equation
+Left-projecting the above equation with $\bra{\Phi_q}$ and using the
+orthonormality of the Slater determinants, we are left with a
+differential equation for each expansion coefficient $A_J(t)$ which
+can be written as the matrix-vector equation
 \begin{equation}
  i\hbar \frac{\partial A(t)}{\partial t} = H(t)A(t). \label{TDFCIEquation}
 \end{equation}
@@ -268,27 +391,37 @@ Here $H(t)$ is the time dependent Hamilton matrix defined in terms of its elemen
 \begin{equation}
  H_{qp}(t) = \braket{\Phi_q|\hat{H}(t)|\Phi_p}
 \end{equation}
-and $A(t) = [A_0(t), A_1(t), \cdots]$ is the vector containing the expansion coefficients. We refer to this as the 
-time dependent Configuration Interaction (TDCI) method. 
+and $A(t) = [A_0(t), A_1(t), \cdots]$ is the vector containing the
+expansion coefficients. We refer to this as the time dependent
+Configuration Interaction (TDCI) method.
 
-Completely analogous to the time independent case we have a hierarchy of TDCI methods defined by the Slater determinant basis. Thus we have 
-a series of possible approximations ranging from TD-CIS to TD-FCI.
-If we did not have to truncate the Slater determinant basis, TDFCI would be an exact solution to the TDSE.
-However, we must in practice truncate the basis and TDFCI suffers from the fact that the size of FCI-space grows exponentially. 
-In order to obtain a good approximation to the exact solution we would need a huge fixed basis\cite{Kvaal12}.
+Completely analogous to the time independent case we have a hierarchy
+of TDCI methods defined by the Slater determinant basis. Thus we have
+a series of possible approximations ranging from TD-CIS to TD-FCI.  If
+we did not have to truncate the Slater determinant basis, TDFCI would
+be an exact solution to the TDSE.  However, we must in practice
+truncate the basis and TDFCI suffers from the fact that the size of
+FCI-space grows exponentially.  In order to obtain a good
+approximation to the exact solution we would need a huge fixed
+basis\cite{Kvaal12}.
 
-On the other hand it is quite straightforward to implement, especially when a program for
-computing the CI-groundstate already has been written. 
-Again, the fact that the CI and CC space are equivalent for $N=2$ makes it worthwhile to write a TDCI program, 
-which we can use to compare with the time dependent Coupled Cluster method which we discuss in the next chapter. 
+On the other hand it is quite straightforward to implement, especially
+when a program for computing the CI-groundstate already has been
+written.  Again, the fact that the CI and CC space are equivalent for
+$N=2$ makes it worthwhile to write a TDCI program, which we can use to
+compare with the time dependent Coupled Cluster method which we
+discuss in the next chapter.
 \begin{comment}
 \subsection{Coupled cluster theory}
-In this section we review Coupled Cluster (CC) theory. 
-We will look at the "classical" way of obtaining the CC equations. The presentation borrows heavily from the 
-excellent review by Crawford and Schaefer\cite{Crawford2000}.
+In this section we review Coupled Cluster (CC) theory.  We will look
+at the "classical" way of obtaining the CC equations. The presentation
+borrows heavily from the excellent review by Crawford and
+Schaefer\cite{Crawford2000}.
 
-Furthermore we look at a different approach which in addition to the usual CC equations also 
-gives a method to solve the time dependent Schrödinger equation, the so-called Orbital Adaptive Coupled Cluster (OATDCC) method\cite{Kvaal12}.
+Furthermore we look at a different approach which in addition to the
+usual CC equations also gives a method to solve the time dependent
+Schrödinger equation, the so-called Orbital Adaptive Coupled Cluster
+(OATDCC) method\cite{Kvaal12}.
 
 \subsubsection{The exponential ansatz}
 As usual we start by considering the time-independent Schrödinger equation
@@ -299,8 +432,9 @@ In Coupled Cluster theory an exponential ansatz
 \begin{equation}
 \ket{\Psi}_{CC} \equiv e^{\hat{T}} \ket{\Phi} \label{ExponantialAnsatzCC},
 \end{equation}
-is used to approximate the exact solution. Here $\ket{\Phi}$ is a reference Slater determinant 
-and $\hat{T} = \sum_{i}^n \hat{T}_i$ is the sum over n-orbital cluster operators. 
+is used to approximate the exact solution. Here $\ket{\Phi}$ is a
+reference Slater determinant and $\hat{T} = \sum_{i}^n \hat{T}_i$ is
+the sum over n-orbital cluster operators.
 
 The the one- and two-orbital cluster operators are defined as
 \begin{equation}
@@ -321,7 +455,8 @@ Recalling the exponential series we can write,
 \end{equation}
 
 \subsection{The Coupled Cluster Equations}
-We now proceed by inserting expression \eqref{ExponantialAnsatzCC} into the time-independent Schrödinger equation
+We now proceed by inserting expression \eqref{ExponantialAnsatzCC}
+into the time-independent Schrödinger equation
 \begin{equation}
 \hat{H}e^{\hat{T}} \ket{\Phi} = Ee^{\hat{T}} \ket{\Phi} \label{ExponantialAnsatzCCInsertedInSE}.
 \end{equation}
@@ -330,15 +465,20 @@ Left-projecting with $\bra{\Phi}$ we get an expression for the energy,
  \braket{\Phi|\hat{H}e^{\hat{T}}|\Phi} &= E \braket{\Phi|e^{\hat{T}}|\Phi} = E \braket{\Phi|\Psi_{CC}} \\
 				       &= E
 \end{align*}
-where intermediate normalization, $\braket{\Phi|\Psi_{CC}} = 1$, is assumed. Furthermore one can obtain an expression for the amplitude $t^{ab...}_{ij...}$ 
-upon left-projection with $\bra{\Phi^{ab...}_{ij...}}$,
+where intermediate normalization, $\braket{\Phi|\Psi_{CC}} = 1$, is
+assumed. Furthermore one can obtain an expression for the amplitude
+$t^{ab...}_{ij...}$ upon left-projection with
+$\bra{\Phi^{ab...}_{ij...}}$,
 \begin{equation}
  \braket{\Phi^{ab...}_{ij...}|\hat{H}e^{\hat{T}}|\Phi} = E\braket{\Phi^{ab...}_{ij...}|e^{\hat{T}}|\Phi}.
 \end{equation}
-Notice that this equations are non-linear (due to the presence of $e^{\hat{T}}$) and depend on the energy equation. This is impractical and is resolved by performing 
-a similarity transformation of the Hamiltonian.
+Notice that this equations are non-linear (due to the presence of
+$e^{\hat{T}}$) and depend on the energy equation. This is impractical
+and is resolved by performing a similarity transformation of the
+Hamiltonian.
 
-Multiply Eq. \eqref{ExponantialAnsatzCCInsertedInSE} with $e^{-\hat{T}}$ and left-project with $\bra{\Phi}$ in order to obtain
+Multiply Eq. \eqref{ExponantialAnsatzCCInsertedInSE} with
+$e^{-\hat{T}}$ and left-project with $\bra{\Phi}$ in order to obtain
 \begin{equation}
  \braket{\Phi|e^{-\hat{T}} \hat{H} e^{\hat{T}} | \Phi} = E \braket{\Phi|e^{-\hat{T}}e^{\hat{T}}|\Phi} = E. \label{SimTransEnergyEquation}
 \end{equation}
@@ -346,11 +486,16 @@ Left-projection with $\bra{\Phi^{ab...}_{ij...}}$ now results in,
 \begin{equation}
  \braket{\Phi^{ab...}_{ij...}|e^{-\hat{T}}\hat{H}e^{\hat{T}}|\Phi} = E \braket{\Phi^{ab...}_{ij...}|\Phi} = 0. \label{SimTransAmplitudeEquation}
 \end{equation}
-Equations \eqref{SimTransEnergyEquation} and \eqref{SimTransAmplitudeEquation} are commonly referred to as the Coupled Cluster equations. Notice now that the equation 
-for the amplitudes does not depend on the energy. The amplitude equation is non-linear and has to be solved iteratively. We say that we have a self-consistent solution to CC-equations
-if the energy converges to some pre-defined precision.
+Equations \eqref{SimTransEnergyEquation} and
+\eqref{SimTransAmplitudeEquation} are commonly referred to as the
+Coupled Cluster equations. Notice now that the equation for the
+amplitudes does not depend on the energy. The amplitude equation is
+non-linear and has to be solved iteratively. We say that we have a
+self-consistent solution to CC-equations if the energy converges to
+some pre-defined precision.
 
-In order to implement the Coupled Cluster method we need algebraic expressions for the CC-equations. 
+In order to implement the Coupled Cluster method we need algebraic
+expressions for the CC-equations.
 \begin{theorem}[Baker-Campbell-Hausdorff expansion]
 For any matrices $A$ and $S$ the Baker-Campbell-Hausdorff (BCH) expansion is given by,
 \begin{equation}
@@ -360,17 +505,27 @@ where
 $$[A,S] \equiv AS - SA$$ 
 is the commutator between $A$ and $S$. 
 \end{theorem}
-Under the assumption that $\hat{H}$ contains at most a two-body operator the BCH-expansion truncates after the first 
-five terms on the right-hand side of eq. \eqref{BCH}\cite{Crawfordtruncates}. 
-This fact greatly simplifies the evaluation of the left-hand sides of the equations \eqref{SimTransEnergyEquation} and \eqref{SimTransAmplitudeEquation}. 
+Under the assumption that $\hat{H}$ contains at most a two-body
+operator the BCH-expansion truncates after the first five terms on the
+right-hand side of eq. \eqref{BCH}\cite{Crawfordtruncates}.  This fact
+greatly simplifies the evaluation of the left-hand sides of the
+equations \eqref{SimTransEnergyEquation} and
+\eqref{SimTransAmplitudeEquation}.
 
-These expressions can be evaluated by hand using the second quantization formalism as demonstrated in\cite{Crawford2000} or by diagrammatic
-techniques\cite{ShavittBartlett}. Alternatively one can use the second quantization toolbox in the Python library Sympy\footnote{\href{http://docs.sympy.org/latest/modules/physics/secondquant.html}{http://docs.sympy.org/latest/modules/physics/secondquant.html}} 
+These expressions can be evaluated by hand using the second
+quantization formalism as demonstrated in\cite{Crawford2000} or by
+diagrammatic techniques\cite{ShavittBartlett}. Alternatively one can
+use the second quantization toolbox in the Python library
+Sympy\footnote{\href{http://docs.sympy.org/latest/modules/physics/secondquant.html}{http://docs.sympy.org/latest/modules/physics/secondquant.html}}
 to compute these expressions.
  
 \subsection{A variational CC theory?}
-One drawback with the CC-method is that it does not satisfy the variational principle \eqref{variationalTheorem}. Consider the operator
-$e^{-\hat{T}}\hat{H}e^{T}$ which appears in the similarity transformed energy equation \eqref{SimTransEnergyEquation}. This operator is not Hermitian. In order to see this compute $\hat{T}_1^\dagger$,
+One drawback with the CC-method is that it does not satisfy the
+variational principle \eqref{variationalTheorem}. Consider the
+operator $e^{-\hat{T}}\hat{H}e^{T}$ which appears in the similarity
+transformed energy equation \eqref{SimTransEnergyEquation}. This
+operator is not Hermitian. In order to see this compute
+$\hat{T}_1^\dagger$,
 \begin{equation}
  \hat{T}_1^\dagger = \left(\sum_{ia} t_i^a c_a^\dagger c_i \right) = \sum_{ia} (t_i^a)^* c_i^\dagger c_a \neq \hat{T}_1.
 \end{equation}
@@ -378,47 +533,64 @@ Then it follows that
 \begin{equation}
  \left(e^{-\hat{T}}\hat{H}e^{\hat{T}}\right)^\dagger = (e^{\hat{T}})^\dagger \hat{H} (e^{-\hat{T}})^\dagger = e^{\hat{T}^\dagger} \hat{H} e^{-\hat{T}^\dagger} \neq e^{-\hat{T}}\hat{H}e^{\hat{T}}.
 \end{equation}
-Hermiticity of the operator was a necessary condition for the variational theorem, thus Eq. \eqref{SimTransEnergyEquation} is not variational. 
-However, if $\hat{T}$ is not truncated the spectrum of $e^{-\hat{T}}\hat{H}e^{T}$
-is identical to the original Hermitian operator $\hat{H}$, which justifies its use in quantum mechanical models\cite{CrawfordNonVar}.
+Hermiticity of the operator was a necessary condition for the
+variational theorem, thus Eq. \eqref{SimTransEnergyEquation} is not
+variational.  However, if $\hat{T}$ is not truncated the spectrum of
+$e^{-\hat{T}}\hat{H}e^{T}$ is identical to the original Hermitian
+operator $\hat{H}$, which justifies its use in quantum mechanical
+models\cite{CrawfordNonVar}.
 
-There has been attempts to construct a variational solution by deriving the amplitude equations by minimizing the functional,
+There has been attempts to construct a variational solution by
+deriving the amplitude equations by minimizing the functional,
 \begin{equation}
  \frac{\braket{\Psi|\hat{H}|\Psi}}{\braket{\Psi|\Psi}} = \frac{\braket{\Phi|(e^{\hat{T}})^\dagger \hat{H}e^{T}|\Phi}}{\braket{\Phi|(e^{\hat{T}})^\dagger e^{\hat{T}}|\Phi}}.
 \end{equation}
 Notice then that $(e^{\hat{T}})^\dagger \hat{H}e^{T}$ does not conform to the Baker-Campbell-Hausdorff formula and the series has no natural truncation, complicating 
 matters greatly. 
 \subsection{The Orbital Adaptive Time Dependent Coupled Cluster Method}
-In the article\cite{Kvaal12} Simen Kvaal demonstrates that it is possible to 
-derive equations of motion for the CC-ansatz by computing critical points of a bivariational expectation value functional. 
-In his approach both the orbitals and CC-amplitudes are allowed to vary and the method can be used to solve the time-dependent Schrödinger equation.  
-The method is called the Orbital Adaptive Time-Dependent Coupled Cluster (OATDCC) and is a hierarchical approximation to MCTDHF. Furthermore, if the orbitals are 
-held fixed in time the method gives a approximation to the Time-Dependent CI method which we refer to as the Time-Dependent Coupled Cluster (TDCC) method. 
-While TDFCI and MCTDHF suffers from exponential scaling, OATDCC and TDCC achieves polynomial scaling.  
+In the article\cite{Kvaal12} Simen Kvaal demonstrates that it is
+possible to derive equations of motion for the CC-ansatz by computing
+critical points of a bivariational expectation value functional.  In
+his approach both the orbitals and CC-amplitudes are allowed to vary
+and the method can be used to solve the time-dependent Schrödinger
+equation.  The method is called the Orbital Adaptive Time-Dependent
+Coupled Cluster (OATDCC) and is a hierarchical approximation to
+MCTDHF. Furthermore, if the orbitals are held fixed in time the method
+gives a approximation to the Time-Dependent CI method which we refer
+to as the Time-Dependent Coupled Cluster (TDCC) method.  While TDFCI
+and MCTDHF suffers from exponential scaling, OATDCC and TDCC achieves
+polynomial scaling.
 
-The main goal of this article is to implement the TDCC method for a possibly time-dependent Hamiltonian. 
-As such we will in the following summarize the key ingredients needed to achieve this. 
-For mathematical details the interested reader is referred to the article by Kvaal.
+The main goal of this article is to implement the TDCC method for a
+possibly time-dependent Hamiltonian.  As such we will in the following
+summarize the key ingredients needed to achieve this.  For
+mathematical details the interested reader is referred to the article
+by Kvaal.
 
 \subsubsection{The Bivariational Principle}
-As we have established, the Coupled Cluster method is not variational in the usual sense since the similarity transformed Hamiltonian,
-$$ \bar{H} = e^{-\hat{T}}\hat{H}e^{\hat{T}} $$
-is not Hermitian. Now following Kvaal, let $A$ be an operator (possibly non-Hermitian) over Hilbert space $\mathcal{H}$ and consider the expectation value functional
+As we have established, the Coupled Cluster method is not variational
+in the usual sense since the similarity transformed Hamiltonian,
+$$ \bar{H} = e^{-\hat{T}}\hat{H}e^{\hat{T}} $$ is not Hermitian. Now
+following Kvaal, let $A$ be an operator (possibly non-Hermitian) over
+Hilbert space $\mathcal{H}$ and consider the expectation value
+functional
 \begin{equation}
  \mathcal{E}_A: \mathcal{H}^{\prime}\times \mathcal{H} \rightarrow \mathbb{C}, \ \ \mathcal{E}_A [\bra{\Psi^{\prime}}, \ket{\Psi}] = \frac{\braket{\Psi^{\prime} |A| \Psi} }{\braket{\Psi^{\prime}|\Psi}}. 
 \end{equation}
-This is referred to as the the bivariational expectation value functional. In contrast to the usual 
-variational principle $\bra{\Psi^{\prime}}$ and $\ket{\Psi}$ are treated as independent parameters. The conditions for 
-$\delta \mathcal{E}_A = 0$, for all independent variations of $\bra{\Psi^{\prime}}$ and $\ket{\Psi}$ is 
+This is referred to as the the bivariational expectation value
+functional. In contrast to the usual variational principle
+$\bra{\Psi^{\prime}}$ and $\ket{\Psi}$ are treated as independent
+parameters. The conditions for $\delta \mathcal{E}_A = 0$, for all
+independent variations of $\bra{\Psi^{\prime}}$ and $\ket{\Psi}$ is
 \begin{equation}
  (A-a)\ket{\Psi} = 0 \ \ \text{and} \ \ \bra{\Psi^{\prime}}(A-a) = 0,
 \end{equation}
-with 
-$$a = \mathcal{E}_A[\bra{\Psi^{\prime}},\ket{\Psi}] $$
+with $$a = \mathcal{E}_A[\bra{\Psi^{\prime}},\ket{\Psi}] $$
 being the value of $\mathcal{E}_A$ at the critical point. 
 
-Equations of motion can be derived from so-called time-dependent variational principles. One such variational is set up 
-using the Lagrange formulation\cite{BECK20001}, 
+Equations of motion can be derived from so-called time-dependent
+variational principles. One such variational is set up using the
+Lagrange formulation\cite{BECK20001},
 \begin{equation}
  \delta \int_0^T L[\ket{\Psi}]dt = 0,
 \end{equation}
@@ -430,24 +602,30 @@ with the boundary conditions $\delta L(t_1) = \delta L(t_2) = 0$. The functional
 \begin{equation}
 \mathcal{S}[\ket{\Psi}] \equiv \int_0^T \braket{\Psi(t)|\hat{H}-i\hbar \frac{\partial}{\partial t}|\Psi(t)} dt \label{ActionFunctional1}
 \end{equation}
-is referred to as the action functional and computing 
-equations of motion from $\delta \mathcal{S} = 0$ is known as the prinicipal of least action.
+is referred to as the action functional and computing equations of
+motion from $\delta \mathcal{S} = 0$ is known as the prinicipal of
+least action.
 
-By considering a bivariational generalization of the action functional \eqref{ActionFunctional1},
+By considering a bivariational generalization of the action functional
+\eqref{ActionFunctional1},
 \begin{align}
  \mathcal{S}[\bra{\Psi^{\prime}}, \ket{\Psi}] \equiv &\int_0^T \frac{\braket{\Psi^{\prime}(t)|i\hbar \frac{\partial}{\partial t}-\hat{H}|\Psi(t)}}{\braket{\Psi^{\prime}(t)|\Psi(t)}} dt \\
  &\int_0^T i\hbar \frac{\braket{\Psi^{\prime}(t)|\frac{\partial}{\partial t}\Psi(t)}}{\braket{\Psi^{\prime}(t)|\Psi(t)}} - \mathcal{E}_H[\bra{\Psi^{\prime}(t)}, \ket{\Psi(t)}] dt. \label{ActionFunctional}
 \end{align}
-Kvaal derives equations of motions generalizing the Coupled Cluster method to the time domain. 
-Here, one should note the appearance of the bivariational generalization of the energy expectation value,
+Kvaal derives equations of motions generalizing the Coupled Cluster
+method to the time domain.  Here, one should note the appearance of
+the bivariational generalization of the energy expectation value,
 \begin{equation}
  \mathcal{E}_H[\bra{\Psi^{\prime}}, \ket{\Psi}] = \frac{\braket{\Psi^{\prime} |\hat{H}| \Psi} }{\braket{\Psi^{\prime}|\Psi}} \label{BivarEnergy},
 \end{equation}
 which is required to be complex analytic as shown in Ref.\cite{Kvaal13}. 
 
 \subsubsection{The Coupled Cluster Ansatz}
-The fundamental idea in\cite{Kvaal12} is to introduce different exponential parametrizations $\ket{\Psi}$, $\bra{\Psi^\prime}$ and 
-compute $\delta \mathcal{S} = 0$, with $\mathcal{S}$ given by \eqref{ActionFunctional}, which ultimately results in time dependent Coupled Cluster equations. 
+The fundamental idea in\cite{Kvaal12} is to introduce different
+exponential parametrizations $\ket{\Psi}$, $\bra{\Psi^\prime}$ and
+compute $\delta \mathcal{S} = 0$, with $\mathcal{S}$ given by
+\eqref{ActionFunctional}, which ultimately results in time dependent
+Coupled Cluster equations.
 
 In particular one make the ansatzes 
 \begin{align}
@@ -456,7 +634,9 @@ In particular one make the ansatzes
 \end{align}
 where $\hat{T}$ is the familiar excitation operator
 \begin{equation}
- \hat{T} = \sum_{ia} \tau_i^a c_a^\dagger \tilde{c}_i + \frac{1}{2!^2} \sum_{ijab} \tau_{ij}^{ab} c_a^\dagger \tilde{c}_i c_b^\dagger \tilde{c}_j + \cdots
+ \hat{T} = \sum_{ia} \tau_i^a c_a^\dagger \tilde{c}_i + \frac{1}{2!^2}
+ \sum_{ijab} \tau_{ij}^{ab} c_a^\dagger \tilde{c}_i c_b^\dagger
+ \tilde{c}_j + \cdots
 \end{equation}
 and $\hat{T}^{\prime}$ is a de-excitation operator on the form
 \begin{equation}
@@ -751,7 +931,7 @@ means that if $A$ and $B$ are two noninteracting subsystems, we should get the s
 carried out the calculations for each subsystem separately or for both subsystems simultaneously. In general 
 truncated exponential wavefunctions have this property while truncated linear wavefunctions does not\cite{Helgaker00book}. 
 
-Depending on the truncation we get a sequence of more and more 
+Depending on the truncation we get a sequence of more and more
 accurate CC approximations:
 \begin{itemize}
  \item $\ket{\Psi_{CCS}} = e^{\hat{T}_1} \ket{\Phi}$ coupled-cluster singles (CCS)
@@ -762,59 +942,87 @@ accurate CC approximations:
 
 \section{Equality of CC and CI for $N=2$.}
 
-An important special case is the case $N=2$. In that case the CC expansion equals the CI expansion. This is invaluable information when we want to implement 
-the CC method since we can then compare it with the corresponding CI method to verify the implementation. To see this let $N=2$ and let 
-$\ket{\Phi}$ be a reference determinant as usual. Observe that $\hat{A}_3 \ket{\Phi} = 0 $ and $\hat{T}_3 = 0$. Thus, 
-$\hat{A} = \hat{A}_1 + \hat{A}_2$ and $\hat{T} = \hat{T}_1 + \hat{T}_2$ will give all non-zero contributions. Additionaly all products of cluster operators 
-where the product has rank larger than $2$, acting on the reference will give a zero result.
-Inserting 
- $\hat{T}_1 = \hat{A}_1$ and $\hat{T}_2 = \hat{A}_2 - \frac{1}{2}\hat{A}_1^2$ into the CC expansionincluding only terms of at most rank $2$ we obtain,  
+An important special case is the case $N=2$. In that case the CC
+expansion equals the CI expansion. This is invaluable information when
+we want to implement the CC method since we can then compare it with
+the corresponding CI method to verify the implementation. To see this
+let $N=2$ and let $\ket{\Phi}$ be a reference determinant as
+usual. Observe that $\hat{A}_3 \ket{\Phi} = 0 $ and $\hat{T}_3 =
+0$. Thus, $\hat{A} = \hat{A}_1 + \hat{A}_2$ and $\hat{T} = \hat{T}_1 +
+\hat{T}_2$ will give all non-zero contributions. Additionaly all
+products of cluster operators where the product has rank larger than
+$2$, acting on the reference will give a zero result.  Inserting
+$\hat{T}_1 = \hat{A}_1$ and $\hat{T}_2 = \hat{A}_2 -
+\frac{1}{2}\hat{A}_1^2$ into the CC expansionincluding only terms of
+at most rank $2$ we obtain,
  \begin{align*}
-  e^{\hat{T}_1 + \hat{T}_2} \ket{\Phi} &= \left( 1 + \underbrace{\hat{T}_1}_{\text{rank} 1} + \underbrace{\left( \hat{T}_2 + \frac{1}{2}\hat{T}_1^2 \right)}_{\text{rank} 2} \right) \ket{\Phi} \\
-  &= \left(1+ \hat{A}_1 + \hat{A}_2 - \frac{1}{2}\hat{A}_1^2 + \frac{1}{2} \hat{A}_1^2 \right) \ket{\Phi} \\
-  &= \left(1+ \hat{A}_1 + \hat{A}_2 \right) \ket{\Phi}
+  e^{\hat{T}_1 + \hat{T}_2} \ket{\Phi} &= \left( 1 +
+  \underbrace{\hat{T}_1}_{\text{rank} 1} + \underbrace{\left(
+    \hat{T}_2 + \frac{1}{2}\hat{T}_1^2 \right)}_{\text{rank} 2}
+  \right) \ket{\Phi} \\ &= \left(1+ \hat{A}_1 + \hat{A}_2 -
+  \frac{1}{2}\hat{A}_1^2 + \frac{1}{2} \hat{A}_1^2 \right) \ket{\Phi}
+  \\ &= \left(1+ \hat{A}_1 + \hat{A}_2 \right) \ket{\Phi}
  \end{align*}
-which indeed is the CI expansion. For $N=2$, $\hat{A} = \hat{A}_1 + \hat{A}_2$ corresponds to a full configuration interaction treatment, while 
-$\hat{T} = \hat{T}_1 + \hat{T}_2$ CCSD, but in this case CCSD is actually equal to FCI. Morover, if we consider only $\hat{T} = \hat{T}_2$ (CCD), we get 
+which indeed is the CI expansion. For $N=2$, $\hat{A} = \hat{A}_1 +
+\hat{A}_2$ corresponds to a full configuration interaction treatment,
+while $\hat{T} = \hat{T}_1 + \hat{T}_2$ CCSD, but in this case CCSD is
+actually equal to FCI. Morover, if we consider only $\hat{T} =
+\hat{T}_2$ (CCD), we get
 \begin{align*}
- \ket{\Psi}_{\text{CCD}} = e^{\hat{T}_2} \ket{\Phi} &= \left(1+ \hat{T}_2 \right) \ket{\Phi} \\
- &= \left( 1 + \hat{A}_2 - \frac{1}{2}\hat{A}_1^2 + \frac{1}{2} \hat{A}_1^2 \right) \ket{\Phi} \\
- &= \left(1 + \hat{A}_2 \right) \ket{\Phi} = \ket{\Psi}_{\text{CID}}.
+ \ket{\Psi}_{\text{CCD}} = e^{\hat{T}_2} \ket{\Phi} &= \left(1+
+ \hat{T}_2 \right) \ket{\Phi} \\ &= \left( 1 + \hat{A}_2 -
+ \frac{1}{2}\hat{A}_1^2 + \frac{1}{2} \hat{A}_1^2 \right) \ket{\Phi}
+ \\ &= \left(1 + \hat{A}_2 \right) \ket{\Phi} =
+ \ket{\Psi}_{\text{CID}}.
 \end{align*}
-The importance of these two results is that one can verify a CCD implementation by comparing with a CID implementation and a CCSD implementation can be 
-verified by comparing with a FCI/CISD implementation.
+The importance of these two results is that one can verify a CCD
+implementation by comparing with a CID implementation and a CCSD
+implementation can be verified by comparing with a FCI/CISD
+implementation.
 
 \section{Amplitude equations}
 Recall that the Hamiltonian in second quantization is given by,
 \begin{equation}
  \hat{H} = \hat{H}^{(1)} + \hat{H}^{(2)} = \sum_{pq} h^p_q c_p^\dagger c_q + \frac{1}{4} \sum_{pqrs} u^{pr}_{qs} c_p^\dagger c_r^\dagger c_s c_q
 \end{equation}
-where $ u^{pr}_{qs} = \braket{\varphi_p \varphi_r|\hat{H}^{(2)}|\varphi_q \varphi_s}_{AS}$.
-Evaluation of the right hand side of equation \eqref{ExpecTamplitude} gives,
+where $ u^{pr}_{qs} = \braket{\varphi_p
+  \varphi_r|\hat{H}^{(2)}|\varphi_q \varphi_s}_{AS}$.  Evaluation of
+the right hand side of equation \eqref{ExpecTamplitude} gives,
 \begin{equation}
- \frac{\partial}{\partial \lambda_{ij}^{ab}}E_{H^{(1)}} = h^{k}_{i} \tau^{ab}_{jk} P(ij) + h^{a}_{c} \tau^{bc}_{ji} P(ab) \label{AlgebraicTampH1},
+ \frac{\partial}{\partial \lambda_{ij}^{ab}}E_{H^{(1)}} = h^{k}_{i}
+ \tau^{ab}_{jk} P(ij) + h^{a}_{c} \tau^{bc}_{ji}
+ P(ab) \label{AlgebraicTampH1},
 \end{equation}
 \begin{align}
- \frac{\partial}{\partial \lambda_{ab}^{ij}}E_{H^{(2)}} = &-\tau^{ab}_{ik} u^{kl}_{jl} P(ij) + \tau^{ab}_{il} \chi_j^l P(ij) \nonumber \\
- &+\tau^{ab}_{kl} \chi^{kl}_{ij} +\tau^{ac}_{ij}\chi_c^b P(ab) \nonumber \\
- &+\tau^{ac}_{ik} \chi_{cj}^{kb}P(ab)P(ij) -\frac{1}{2}\tau^{dc}_{ji} u^{ab}_{dc} \nonumber \\ 
- &+u^{ab}_{ij} \label{AlgebraicTampH2},
+ \frac{\partial}{\partial \lambda_{ab}^{ij}}E_{H^{(2)}} =
+ &-\tau^{ab}_{ik} u^{kl}_{jl} P(ij) + \tau^{ab}_{il} \chi_j^l P(ij)
+ \nonumber \\ &+\tau^{ab}_{kl} \chi^{kl}_{ij} +\tau^{ac}_{ij}\chi_c^b
+ P(ab) \nonumber \\ &+\tau^{ac}_{ik} \chi_{cj}^{kb}P(ab)P(ij)
+ -\frac{1}{2}\tau^{dc}_{ji} u^{ab}_{dc} \nonumber
+ \\ &+u^{ab}_{ij} \label{AlgebraicTampH2},
 \end{align}
-where $P(ij)$ is an anti-symmtrizer in the sense that $f(ij)P(ij) = f(ij)-f(ji)$ and similarly for $P(ab)$. We have defined the so-called intermediates,
+where $P(ij)$ is an anti-symmtrizer in the sense that $f(ij)P(ij) =
+f(ij)-f(ji)$ and similarly for $P(ab)$. We have defined the so-called
+intermediates,
 \begin{align}
  \chi^{kl}_{ij} &= \frac{1}{4} \tau^{cd}_{ij} u^{kl}_{cd} + \frac{1}{2} u^{kl}_{ij} \label{Xklij} \\
  \chi_c^b &= \frac{1}{2} \tau^{bd}_{kl}  u^{kl}_{dc}  +  u^{bk}_{ck} \label{Xcb} \\
  \chi_j^l &= \frac{1}{2}\tau^{dc}_{jk} u^{kl}_{dc} \label{Xjl} \\
  \chi_{cj}^{kb} &= u^{kb}_{cj} + \frac{1}{2} u^{kl}_{cd}\tau^{bd}_{jl} \label{Xcjkb} .
 \end{align}
-We use the Einstein summation convention over repeated indices of opposite vertical placement. The appearance of a $P(ij)$ or a $P(ab)$ should be ignored
-for the invocation of the summation convention. This means that for example the expression $h^{k}_{i} \tau^{ab}_{jk} P(ij)$ is interpreted as,
+We use the Einstein summation convention over repeated indices of
+opposite vertical placement. The appearance of a $P(ij)$ or a $P(ab)$
+should be ignored for the invocation of the summation convention. This
+means that for example the expression $h^{k}_{i} \tau^{ab}_{jk} P(ij)$
+is interpreted as,
 \begin{equation*}
  h^{k}_{i} \tau^{ab}_{jk} P(ij) = \sum_k \left(h^{k}_{i} \tau^{ab}_{jk} - h^{k}_{j} \tau^{ab}_{ik} \right).
 \end{equation*}
-In other words, we sum over all indices that does not appear on the left-hand side of all following expressions. 
+In other words, we sum over all indices that does not appear on the
+left-hand side of all following expressions.
 
-Evaluation of the right hand side of equation \eqref{ExpexLamplitude} results in,
+Evaluation of the right hand side of equation \eqref{ExpexLamplitude}
+results in,
 \begin{align}
  \frac{\partial}{\partial \tau_{ij}^{ab}}E_{H^{(1)}} = h^{c}_{a} \lambda^{ji}_{bc} P(ab) + h^{i}_{k} \lambda^{jk}_{ab} P(ij) \label{AlgebraicLampH1},
 \end{align}
@@ -858,8 +1066,9 @@ The non-zero elements of the two-body density matrix are given by,
 
 \end{appendices}
 \end{comment}
-\clearpage
 \bibliographystyle{ieeetr}
 \bibliography{references}
 
 \end{document}
+
+
