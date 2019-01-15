@@ -11,7 +11,7 @@ import os
 rc('text',usetex=True)
 rc('font',**{'family':'serif','serif':['New fits of nuclear forces']})
 
-data = loadtxt("protonf72.dat")
+data = loadtxt("f72.dat")
 
 l = len(data[:,0])
 
