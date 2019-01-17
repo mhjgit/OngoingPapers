@@ -41,231 +41,45 @@
 
 \end{abstract}
 
-\pacs{32.80.Rm, 31.15.A-, 42.65.Ky}
+
 
 \maketitle
 
 
-
-
-\section{Introduction}
-
-\end{document}
-
-
-%%
-%% Automatically generated file from DocOnce source
-%% (https://github.com/hplgit/doconce/)
-%%
-%%
-
-
-%-------------------- begin preamble ----------------------
-
-\documentclass[%
-oneside,                 % oneside: electronic viewing, twoside: printing
-final,                   % draft: marks overfull hboxes, figures with paths
-10pt]{article}
-
-\listfiles               %  print all files needed to compile this document
-
-\usepackage{relsize,makeidx,color,setspace,amsmath,amsfonts,amssymb}
-\usepackage[table]{xcolor}
-\usepackage{bm,ltablex,microtype}
-
-\usepackage[pdftex]{graphicx}
-
-\usepackage{fancyvrb} % packages needed for verbatim environments
-\usepackage{minted}
-\usemintedstyle{default}
-
-\usepackage[T1]{fontenc}
-%\usepackage[latin1]{inputenc}
-\usepackage{ucs}
-\usepackage[utf8x]{inputenc}
-
-\usepackage{lmodern}         % Latin Modern fonts derived from Computer Modern
-
-% Hyperlinks in PDF:
-\definecolor{linkcolor}{rgb}{0,0,0.4}
-\usepackage{hyperref}
-\hypersetup{
-    breaklinks=true,
-    colorlinks=true,
-    linkcolor=linkcolor,
-    urlcolor=linkcolor,
-    citecolor=black,
-    filecolor=black,
-    %filecolor=blue,
-    pdfmenubar=true,
-    pdftoolbar=true,
-    bookmarksdepth=3   % Uncomment (and tweak) for PDF bookmarks with more levels than the TOC
-    }
-%\hyperbaseurl{}   % hyperlinks are relative to this root
-
-\setcounter{tocdepth}{2}  % levels in table of contents
-
-% Tricks for having figures close to where they are defined:
-% 1. define less restrictive rules for where to put figures
-\setcounter{topnumber}{2}
-\setcounter{bottomnumber}{2}
-\setcounter{totalnumber}{4}
-\renewcommand{\topfraction}{0.95}
-\renewcommand{\bottomfraction}{0.95}
-\renewcommand{\textfraction}{0}
-\renewcommand{\floatpagefraction}{0.75}
-% floatpagefraction must always be less than topfraction!
-% 2. ensure all figures are flushed before next section
-\usepackage[section]{placeins}
-% 3. enable begin{figure}[H] (often leads to ugly pagebreaks)
-%\usepackage{float}\restylefloat{figure}
-
-% --- fancyhdr package for fancy headers ---
-\usepackage{fancyhdr}
-\fancyhf{} % sets both header and footer to nothing
-\renewcommand{\headrulewidth}{0pt}
-\fancyfoot[LE,RO]{\thepage}
-% Ensure copyright on titlepage (article style) and chapter pages (book style)
-\fancypagestyle{plain}{
-  \fancyhf{}
-  \fancyfoot[C]{{\footnotesize \copyright\ 1999-2019, Morten Hjorth-Jensen. Released under CC Attribution-NonCommercial 4.0 license}}
-%  \renewcommand{\footrulewidth}{0mm}
-  \renewcommand{\headrulewidth}{0mm}
-}
-% Ensure copyright on titlepages with \thispagestyle{empty}
-\fancypagestyle{empty}{
-  \fancyhf{}
-  \fancyfoot[C]{{\footnotesize \copyright\ 1999-2019, Morten Hjorth-Jensen. Released under CC Attribution-NonCommercial 4.0 license}}
-  \renewcommand{\footrulewidth}{0mm}
-  \renewcommand{\headrulewidth}{0mm}
-}
-
-\pagestyle{fancy}
-
-
-\usepackage[framemethod=TikZ]{mdframed}
-
-% --- begin definitions of admonition environments ---
-
-% --- end of definitions of admonition environments ---
-
-% prevent orhpans and widows
-\clubpenalty = 10000
-\widowpenalty = 10000
-
-% --- end of standard preamble for documents ---
-
-
-% insert custom LaTeX commands...
-
-\raggedbottom
-\makeindex
-\usepackage[totoc]{idxlayout}   % for index in the toc
-\usepackage[nottoc]{tocbibind}  % for references/bibliography in the toc
-
-%-------------------- end preamble ----------------------
-
-\begin{document}
-
-% matching end for #ifdef PREAMBLE
-
-\newcommand{\exercisesection}[1]{\subsection*{#1}}
-
-
-% ------------------- main content ----------------------
-
-
-
-% ----------------- title -------------------------
-
-\thispagestyle{empty}
-
-\begin{center}
-{\LARGE\bf
-\begin{spacing}{1.25}
-Solving quantum mechanical problems with Machine Learning
-\end{spacing}
-}
-\end{center}
-
-% ----------------- author(s) -------------------------
-
-\begin{center}
-{\bf Morten Hjorth-Jensen${}^{1, 2}$} \\ [0mm]
-\end{center}
-
-\begin{center}
-% List of all institutions:
-\centerline{{\small ${}^1$Department of Physics and Astronomy and National Superconducting Cyclotron Laboratory, Michigan State University, USA}}
-\centerline{{\small ${}^2$Department of Physics and Center for Computing in Science Education, University of Oslo, Norway}}
-\end{center}
-    
-% ----------------- end author(s) -------------------------
-
-% --- begin date ---
-\begin{center}
-Jan 16, 2019 
-\end{center}
-% --- end date ---
-
-\vspace{1cm}
-
-
-% !split
-\subsection*{What is this talk about?}
-
-% --- begin paragraph admon ---
-\paragraph{}
-The main aim is to give you a short and pedestrian introduction to  how we can use Machine Learning methods
-to solve quantum mechanical many-body problems. And why this could be of interest. 
-
-The hope is that after this talk you have gotten the basic ideas to get you started. Peeping into \href{{https://github.com/mhjensenseminars/MachineLearningTalk}}{\nolinkurl{https://github.com/mhjensenseminars/MachineLearningTalk}}, you'll find a Jupyter notebook, slides, codes etc that will allow you to reproduce the simulations discussed here, and perhaps run your own very first calculations.
-
-Try it out and please don't hesitate to swing by if something is unclear.
-% --- end paragraph admon ---
-
-
-
-
-% !split
-\subsection*{Why?}
-
-How can we avoid the dimensionality curse? Many possibilities
-\begin{enumerate}
-\item smarter basis functions
-
-\item resummation of specific correlations
-
-\item stochastic sampling of high-lying states (stochastic FCI, CC and SRG/IMSRG)
-
-\item many more
-\end{enumerate}
-
-\noindent
-Machine Learning and Quantum Computing hold also great promise in tackling the 
-ever increasing dimensionalities. Here we will focus on Machine Learning.
-
-
-% !split
-\subsection*{Overview}
-
-% --- begin paragraph admon ---
-\paragraph{}
-\begin{itemize}
-\item Short intro to Machine Learning
-
-\item Variational Monte Carlo (Markov Chain Monte Carlo, $\mathrm{MC}^2$) and two-electron quantum dots, solving quantum mechanical problems in a stochastic way. It  will serve as  our motivation for switching to Machine Learning. 
-
-\item From Variational Monte Carlo to Boltzmann Machines and Machine Learning
-\end{itemize}
-
-\noindent
-% --- end paragraph admon ---
-
-
-
-% !split
-\subsection*{What are the Machine Learning calculations here based on?}
+\section{Introduction and motivation}
+
+Traditional many-body methods like full configuration interaction
+theory (FCI), coupled-cluster (CC) theory, many-body perturbation
+theory (MBPT), in-medium similarity renormalization group (IMSRG),
+various Monte Carlo methods and many other many-body approaches, have
+been rather successful in describing properties of nuclear
+systems. However, essentially all of these methods face what is
+normally called the curse of dimensionality. For wave function based
+method like FCI or CC theories where the original continuous problem
+is discretized in terms selected basis functions and/or many-body
+excitations, the dimensionality of systems under study grows almost
+exponentially when larger basis sets and/or number of particles are
+included. Nuclear systems close to the limits of stability pose in
+particular a tough problem to many-body practitioners in terms of an
+increase of the number of relevant degrees of freedom. To describe say
+weakly bound nuclei within the framework of a wave function based
+approach, requires often a single-particle basis which includes bound,
+weakly bound and unbound states, increasing thereby considerably the
+number of many-body basis states. This renders often a standard
+shell-model calculation infeasible. Within the above mentioned
+many-body methods there are however several interesting theoretical
+approachs which attempt at circumventing the dimensionality
+curse. Smarter basis sets is one of these approaches, as well as the
+resummation of specific correlations and the recently proposed
+stochastic sampling of many-body states in both FCI and CC
+calculations.
+
+Recently, several authors of pointed to  possibilities within the
+broad fields of Machine Learning and Quantum Computing as approaches
+that hold great promise in tackling the ever increasing
+dimensionalities. There are several groups worldwide which now focus
+on Machine Learning and/or Quantum Computing applied to many-body
+problems.
 
 This work is inspired by the idea of representing the wave function with
 a restricted Boltzmann machine (RBM), presented recently by \href{{http://science.sciencemag.org/content/355/6325/602}}{G. Carleo and M. Troyer, Science \textbf{355}, Issue 6325, pp. 602-606 (2017)}. They
@@ -273,14 +87,8 @@ named such a wave function/network a \emph{neural network quantum state} (NQS). 
 spin lattice systems of the Ising model and Heisenberg model, with
 encouraging results.
 
-Thanks to Jane Kim (MSU), Vilde Flugsrud (UiO), Alfred Alocias Mariadason (UiO) for many discussions and interpretations.
+Here we try to implement these algorithms to many-body systems that mimick a nuclear physics like problem, namely electrons confined to move in harmonic oscillator like potentials. 
 
-
-% !split
-\subsection*{A new world}
-
-% --- begin paragraph admon ---
-\paragraph{}
 Machine learning (ML) is an extremely rich field, in spite of its young age. The
 increases we have seen during the last three decades in computational
 capabilities have been followed by developments of methods and
@@ -288,109 +96,7 @@ techniques for analyzing and handling large date sets, relying heavily
 on statistics, computer science and mathematics.  The field is rather
 new and developing rapidly. 
 
-Popular software packages written in Python for ML are
 
-\begin{itemize}
-\item \href{{http://scikit-learn.org/stable/}}{Scikit-learn}, 
-
-\item \href{{https://www.tensorflow.org/}}{Tensorflow},
-
-\item \href{{http://pytorch.org/}}{PyTorch} and 
-
-\item \href{{https://keras.io/}}{Keras}.
-\end{itemize}
-
-\noindent
-These are all freely available at their respective GitHub sites. They 
-encompass communities of developers in the thousands or more. And the number
-of code developers and contributors keeps increasing.
-% --- end paragraph admon ---
-
-
-
-% !split
-\subsection*{Lots of room for creativity}
-
-% --- begin paragraph admon ---
-\paragraph{}
-Not all the
-algorithms and methods can be given a rigorous mathematical
-justification, opening up thereby for experimenting
-and trial and error and thereby exciting new developments.
-% --- end paragraph admon ---
-
-
-
-
-% --- begin paragraph admon ---
-\paragraph{}
-A solid command of linear algebra, multivariate theory, 
-probability theory, statistical data analysis,
-understanding errors and Monte Carlo methods is important in order to understand many of the 
-various algorithms and methods.
-% --- end paragraph admon ---
-
-
-
-\textbf{Job market, a personal statement}: \href{{https://www.analyticsindiamag.com/top-countries-hiring-most-number-of-artificial-intelligence-machine-learning-experts/}}{A familiarity with ML is almost becoming a prerequisite for many of the most exciting employment opportunities}. And add quantum computing and there you are!
-
-
-% !split
-\subsection*{Knowledge of Statistical analysis and optimization of data}
-Some key elements that enter much of the discussion on ML:
-\begin{enumerate}
-\item Basic concepts, expectation values, variance, covariance, correlation functions and errors;
-
-\item Simpler models, binomial distribution, the Poisson distribution, simple and multivariate normal distributions;
-
-\item Central elements of Bayesian statistics and modeling;
-
-\item Central elements from linear algebra
-
-\item Gradient methods for data optimization
-
-\item Monte Carlo methods, Markov chains, Metropolis-Hastings algorithm;
-
-\item Estimation of errors using cross-validation, blocking, bootstrapping and jackknife methods;
-
-\item Practical optimization using Singular-value decomposition and least squares for parameterizing data.
-
-\item Principal Component Analysis.
-\end{enumerate}
-
-\noindent
-% !split 
-\subsection*{Some members of the ML family}
-
-
-% --- begin paragraph admon ---
-\paragraph{}
-\begin{enumerate}
-\item Linear regression and its variants, Logistic regression
-
-\item Decision tree algorithms, from simpler to more complex ones like random forests
-
-\item Bayesian statistics 
-
-\item Support vector machines and finally various variants of
-
-\item Artifical neural networks and deep learning
-
-\item Convolutional NN, autoenconders
-
-\item and many more
-\end{enumerate}
-
-\noindent
-% --- end paragraph admon ---
-
-
-
-% !split
-\subsection*{What are the basic ingredients?}
-
-% --- begin paragraph admon ---
-\paragraph{}
 Almost every problem in ML and data science starts with the same ingredients:
 \begin{itemize}
 \item The dataset $\mathbf{x}$ (could be some observable quantity of the system we are studying)
@@ -402,15 +108,8 @@ Almost every problem in ML and data science starts with the same ingredients:
 
 \noindent
 We seek to minimize the function $\mathcal{C} (\mathbf{x}, f(\mathbf{\alpha}))$ by finding the parameter values which minimize $\mathcal{C}$. This leads to  various minimization algorithms.
-% --- end paragraph admon ---
 
-
-
-% !split
-\subsection*{What is Machine Learning?}
-
-% --- begin paragraph admon ---
-\paragraph{}
+\section{What is Machine Learning}
 Machine learning is the science of giving computers the ability to
 learn without being explicitly programmed.  The idea is that there
 exist generic algorithms which can be used to find patterns in a broad
@@ -426,16 +125,7 @@ years, found applications in a wide variety of other areas, including
 bioinformatics, economy, physics, finance and marketing.
 
 You will notice however that many of the basic ideas discussed do come from Physics!
-% --- end paragraph admon ---
 
-
-
-% !split
-\subsection*{Types of Machine Learning}
-
-
-% --- begin paragraph admon ---
-\paragraph{}
 The approaches to machine learning are many, but are often split into two main categories. 
 In \emph{supervised learning} we know the answer to a problem,
 and let the computer deduce the logic behind it. On the other hand, \emph{unsupervised learning}
@@ -455,17 +145,7 @@ Some of the most common tasks are:
   \item Clustering: Data are divided into groups with certain common traits, without knowing the different groups beforehand.  It is thus a form of unsupervised learning.
 \end{itemize}
 
-\noindent
-% --- end paragraph admon ---
 
-
-
-
-% !split
-\subsection*{References}
-
-% --- begin paragraph admon ---
-\paragraph{}
 \begin{itemize}
 \item An excellent reference, \href{{https://arxiv.org/abs/1803.08823}}{Mehta \emph{et al.}, arXiv:1803.08823 and Physics Reports in press (2018)}
 
@@ -475,226 +155,14 @@ Some of the most common tasks are:
 
 \item \href{{https://github.com/CompPhysics/MachineLearning}}{Books and lectures notes} and see also the course \href{{https://www.uio.no/studier/emner/matnat/fys/FYS-STK4155/h18/index.html}}{FYS-STK3155/4155}
 
-\item See also Metha and Schwab, arXiv.1410.3831, how to link Variational renormalization group theory with deep learning (recommended read)
-\end{itemize}
-
-\noindent
-% --- end paragraph admon ---
-
-
-
-
-% !split
-\subsection*{Another interesting article}
 
 Here we will use so-called \textbf{reduced Boltzmann Machines} to simulate quantum many-body problems. For Monte Carlo aficionados, there is a very close similarity with what are called \textbf{shadow wave functions}, see the work of \href{{https://journals.aps.org/pre/abstract/10.1103/PhysRevE.90.053304}}{Pederiva and Kalos and collaborators, Phys Rev. E 90, 053304 (2014)}.
 
 
-% !split
-\subsection*{Courses on Data science and Machine Learning  at UiO}
 
-The \href{{https://www.mn.uio.no/english/research/about/centre-focus/innovation/data-science/studies/}}{link here}  gives an excellent overview of courses on Machine learning at UiO.
 
-\begin{enumerate}
-\item \href{{http://www.uio.no/studier/emner/matnat/math/STK2100/index-eng.html}}{STK2100 Machine learning and statistical methods for prediction and classification}. 
 
-\item \href{{https://www.uio.no/studier/emner/matnat/ifi/IN3050/index-eng.html}}{IN3050 Introduction to Artificial Intelligence and Machine Learning}. Introductory course in machine learning and AI with an algorithmic approach. 
 
-\item \href{{http://www.uio.no/studier/emner/matnat/math/STK-INF3000/index-eng.html}}{STK-INF3000/4000 Selected Topics in Data Science}. The course provides insight into selected contemporary relevant topics within Data Science. 
-
-\item \href{{https://www.uio.no/studier/emner/matnat/ifi/IN4080/index.html}}{IN4080 Natural Language Processing}. Probabilistic and machine learning techniques applied to natural language processing. 
-
-\item \href{{https://www.uio.no/studier/emner/matnat/math/STK-IN4300/index-eng.html}}{STK-IN4300 – Statistical learning methods in Data Science}. An advanced introduction to statistical and machine learning. For students with a good mathematics and statistics background.
-
-\item \href{{http://www.uio.no/studier/emner/matnat/ifi/INF4490/}}{INF4490 Biologically Inspired Computing}. An introduction to self-adapting methods also called artificial intelligence or machine learning. 
-
-\item \href{{https://www.uio.no/studier/emner/matnat/ifi/IN-STK5000/index-eng.html}}{IN-STK5000  Adaptive Methods for Data-Based Decision Making}. Methods for adaptive collection and processing of data based on machine learning techniques. 
-
-\item \href{{https://www.uio.no/studier/emner/matnat/ifi/IN5400/}}{IN5400/INF5860 – Machine Learning for Image Analysis}. An introduction to deep learning with particular emphasis on applications within Image analysis, but useful for other application areas too.
-
-\item \href{{https://www.uio.no/studier/emner/matnat/its/TEK5040/}}{TEK5040 – Deep learning}. The course addresses advanced algorithms and architectures for deep learning with neural networks. The course provides an introduction to how deep-learning techniques can be used in the construction of key parts of advanced autonomous systems that exist in physical environments and cyber environments.
-\end{enumerate}
-
-\noindent
-% !split
-\subsection*{Additional courses of interest}
-
-\begin{enumerate}
-\item \href{{https://www.uio.no/studier/emner/matnat/math/STK4051/index-eng.html}}{STK4051 Computational Statistics}
-
-\item \href{{https://www.uio.no/studier/emner/matnat/math/STK4021/index-eng.html}}{STK4021 Applied Bayesian Analysis and Numerical Methods}
-\end{enumerate}
-
-\noindent
-% !split
-\subsection*{Decision trees and Regression}
-\begin{minted}[fontsize=\fontsize{9pt}{9pt},linenos=false,mathescape,baselinestretch=1.0,fontfamily=tt,xleftmargin=7mm]{python}
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LinearRegression
-
-steps=250
-
-distance=0
-x=0
-distance_list=[]
-steps_list=[]
-while x<steps:
-    distance+=np.random.randint(-1,2)
-    distance_list.append(distance)
-    x+=1
-    steps_list.append(x)
-plt.plot(steps_list,distance_list, color='green', label="Random Walk Data")
-
-steps_list=np.asarray(steps_list)
-distance_list=np.asarray(distance_list)
-
-X=steps_list[:,np.newaxis]
-
-#Polynomial fits
-
-#Degree 2
-poly_features=PolynomialFeatures(degree=2, include_bias=False)
-X_poly=poly_features.fit_transform(X)
-
-lin_reg=LinearRegression()
-poly_fit=lin_reg.fit(X_poly,distance_list)
-b=lin_reg.coef_
-c=lin_reg.intercept_
-print ("2nd degree coefficients:")
-print ("zero power: ",c)
-print ("first power: ", b[0])
-print ("second power: ",b[1])
-
-z = np.arange(0, steps, .01)
-z_mod=b[1]*z**2+b[0]*z+c
-
-fit_mod=b[1]*X**2+b[0]*X+c
-plt.plot(z, z_mod, color='r', label="2nd Degree Fit")
-plt.title("Polynomial Regression")
-
-plt.xlabel("Steps")
-plt.ylabel("Distance")
-
-#Degree 10
-poly_features10=PolynomialFeatures(degree=10, include_bias=False)
-X_poly10=poly_features10.fit_transform(X)
-
-poly_fit10=lin_reg.fit(X_poly10,distance_list)
-
-y_plot=poly_fit10.predict(X_poly10)
-plt.plot(X, y_plot, color='black', label="10th Degree Fit")
-
-plt.legend()
-plt.show()
-
-
-#Decision Tree Regression
-from sklearn.tree import DecisionTreeRegressor
-regr_1=DecisionTreeRegressor(max_depth=2)
-regr_2=DecisionTreeRegressor(max_depth=5)
-regr_3=DecisionTreeRegressor(max_depth=7)
-regr_1.fit(X, distance_list)
-regr_2.fit(X, distance_list)
-regr_3.fit(X, distance_list)
-
-X_test = np.arange(0.0, steps, 0.01)[:, np.newaxis]
-y_1 = regr_1.predict(X_test)
-y_2 = regr_2.predict(X_test)
-y_3=regr_3.predict(X_test)
-
-# Plot the results
-plt.figure()
-plt.scatter(X, distance_list, s=2.5, c="black", label="data")
-plt.plot(X_test, y_1, color="red",
-         label="max_depth=2", linewidth=2)
-plt.plot(X_test, y_2, color="green", label="max_depth=5", linewidth=2)
-plt.plot(X_test, y_3, color="m", label="max_depth=7", linewidth=2)
-
-plt.xlabel("Data")
-plt.ylabel("Darget")
-plt.title("Decision Tree Regression")
-plt.legend()
-plt.show()
-
-\end{minted}
-
-
-
-
-% !split
-\subsection*{Artificial neurons}
-
-% --- begin paragraph admon ---
-\paragraph{}
-
-The field of artificial neural networks has a long history of
-development, and is closely connected with the advancement of computer
-science and computers in general. A model of artificial neurons was
-first developed by McCulloch and Pitts in 1943 to study signal
-processing in the brain and has later been refined by others. The
-general idea is to mimic neural networks in the human brain, which is
-composed of billions of neurons that communicate with each other by
-sending electrical signals.  Each neuron accumulates its incoming
-signals, which must exceed an activation threshold to yield an
-output. If the threshold is not overcome, the neuron remains inactive,
-i.e.~has zero output.
-
-This behaviour has inspired a simple mathematical model for an artificial neuron.
-
-\[
- y = f\left(\sum_{i=1}^n w_ix_i\right) = f(u)
-\]
-Here, the output $y$ of the neuron is the value of its activation function, which have as input
-a weighted sum of signals $x_i, \dots ,x_n$ received by $n$ other neurons.
-% --- end paragraph admon ---
-
-
-
-% !split
-\subsection*{A simple perceptron model}
-
-
-
-\vspace{6mm}
-
-% inline figure
-\centerline{\includegraphics[width=0.9\linewidth]{figures/perceptron.png}}
-
-\vspace{6mm}
-
-
-
-
-% !split
-\subsection*{Neural network types}
-
-% --- begin paragraph admon ---
-\paragraph{}
-An artificial neural network (NN), is a computational model that consists of layers of connected neurons, or \emph{nodes}. 
-It is supposed to mimic a biological nervous system by letting each neuron interact with other neurons
-by sending signals in the form of mathematical functions between layers. 
-A wide variety of different NNs have
-been developed, but most of them consist of an input layer, an output layer and eventual layers in-between, called
-\emph{hidden layers}. All layers can contain an arbitrary number of nodes, and each connection between two nodes
-is associated with a weight variable. 
-
-
-
-\vspace{6mm}
-
-% inline figure
-\centerline{\includegraphics[width=0.6\linewidth]{figures/dnn.png}}
-
-\vspace{6mm}
-% --- end paragraph admon ---
-
-
-
-
-
-% !split
 \subsection*{The system: two electrons in a harmonic oscillator trap in two dimensions}
 
 The Hamiltonian of the quantum dot is given by
@@ -734,29 +202,9 @@ In general, the integrals involved in the calculation of various  expectation va
 
 
 
-% !split
 \subsection*{Quantum Monte Carlo Motivation}
 
-% --- begin paragraph admon ---
-\paragraph{Basic steps.}
-Choose a trial wave function
-$\psi_T(\bm{R})$.
-\[
-   P(\bm{R},\bm{\alpha})= \frac{\left|\psi_T(\bm{R},\bm{\alpha})\right|^2}{\int \left|\psi_T(\bm{R},\bm{\alpha})\right|^2d\bm{R}}.
-\]
-This is our model, or likelihood/probability distribution function  (PDF). It depends on some variational parameters $\bm{\alpha}$.
-The approximation to the expectation value of the Hamiltonian is now 
-\[
-   \langle E[\bm{\alpha}] \rangle = 
-   \frac{\int d\bm{R}\Psi^{\ast}_T(\bm{R},\bm{\alpha})H(\bm{R})\Psi_T(\bm{R},\bm{\alpha})}
-        {\int d\bm{R}\Psi^{\ast}_T(\bm{R},\bm{\alpha})\Psi_T(\bm{R},\bm{\alpha})}.
-\]
-% --- end paragraph admon ---
 
-
-
-
-% !split
 \subsection*{Quantum Monte Carlo Motivation}
 
 % --- begin paragraph admon ---
@@ -871,163 +319,6 @@ condition for each electron pair $ij$.
 
 
 
-% !split
-\subsection*{The VMC code}
-
-\begin{minted}[fontsize=\fontsize{9pt}{9pt},linenos=false,mathescape,baselinestretch=1.0,fontfamily=tt,xleftmargin=7mm]{python}
-# Importing various packages
-from math import exp, sqrt
-from random import random, seed
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib import cm
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
-import sys
-
-#Trial wave function for quantum dots in two dims
-def WaveFunction(r,alpha,beta):
-    r1 = r[0,0]**2 + r[0,1]**2
-    r2 = r[1,0]**2 + r[1,1]**2
-    r12 = sqrt((r[0,0]-r[1,0])**2 + (r[0,1]-r[1,1])**2)
-    deno = r12/(1+beta*r12)
-    return exp(-0.5*alpha*(r1+r2)+deno)
-
-#Local energy  for quantum dots in two dims, using analytical local energy
-def LocalEnergy(r,alpha,beta):
-    
-    r1 = (r[0,0]**2 + r[0,1]**2)
-    r2 = (r[1,0]**2 + r[1,1]**2)
-    r12 = sqrt((r[0,0]-r[1,0])**2 + (r[0,1]-r[1,1])**2)
-    deno = 1.0/(1+beta*r12)
-    deno2 = deno*deno
-    return 0.5*(1-alpha*alpha)*(r1 + r2) +2.0*alpha + 1.0/r12+deno2*(alpha*r12-deno2+2*beta*deno-1.0/r12)
-
-# The Monte Carlo sampling with the Metropolis algo
-def MonteCarloSampling():
-
-    NumberMCcycles= 100000
-    StepSize = 1.0
-    # positions
-    PositionOld = np.zeros((NumberParticles,Dimension), np.double)
-    PositionNew = np.zeros((NumberParticles,Dimension), np.double)
-    # seed for rng generator
-    seed()
-    # start variational parameter
-    alpha = 0.9
-    for ia in range(MaxVariations):
-        alpha += .025
-        AlphaValues[ia] = alpha
-        beta = 0.2 
-        for jb in range(MaxVariations):
-            beta += .01
-            BetaValues[jb] = beta
-            energy = energy2 = 0.0
-            DeltaE = 0.0
-            #Initial position
-            for i in range(NumberParticles):
-                for j in range(Dimension):
-                    PositionOld[i,j] = StepSize * (random() - .5)
-            wfold = WaveFunction(PositionOld,alpha,beta)
-
-            #Loop over MC MCcycles
-            for MCcycle in range(NumberMCcycles):
-                #Trial position
-                for i in range(NumberParticles):
-                    for j in range(Dimension):
-                        PositionNew[i,j] = PositionOld[i,j] + StepSize * (random() - .5)
-                wfnew = WaveFunction(PositionNew,alpha,beta)
-
-                #Metropolis test to see whether we accept the move
-                if random() < wfnew**2 / wfold**2:
-                   PositionOld = PositionNew.copy()
-                   wfold = wfnew
-                   DeltaE = LocalEnergy(PositionOld,alpha,beta)
-                energy += DeltaE
-                energy2 += DeltaE**2
-
-            #We calculate mean, variance and error ...
-            energy /= NumberMCcycles
-            energy2 /= NumberMCcycles
-            variance = energy2 - energy**2
-            error = sqrt(variance/NumberMCcycles)
-            Energies[ia,jb] = energy    
-    return Energies, AlphaValues, BetaValues
-
-
-#Here starts the main program with variable declarations
-NumberParticles = 2
-Dimension = 2
-MaxVariations = 10
-Energies = np.zeros((MaxVariations,MaxVariations))
-AlphaValues = np.zeros(MaxVariations)
-BetaValues = np.zeros(MaxVariations)
-(Energies, AlphaValues, BetaValues) = MonteCarloSampling()
-
-# Prepare for plots
-fig = plt.figure()
-ax = fig.gca(projection='3d')
-# Plot the surface.
-X, Y = np.meshgrid(AlphaValues, BetaValues)
-surf = ax.plot_surface(X, Y, Energies,cmap=cm.coolwarm,linewidth=0, antialiased=False)
-# Customize the z axis.
-zmin = np.matrix(Energies).min()
-zmax = np.matrix(Energies).max()
-ax.set_zlim(zmin, zmax)
-ax.set_xlabel(r'$\alpha$')
-ax.set_ylabel(r'$\beta$')
-ax.set_zlabel(r'$\langle E \rangle$')
-ax.zaxis.set_major_locator(LinearLocator(10))
-ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-# Add a color bar which maps values to colors.
-fig.colorbar(surf, shrink=0.5, aspect=5)
-plt.show()
-
-\end{minted}
-
-
-% !split
-\subsection*{Technical aspect, improvements and how to define the cost function}
-
-% --- begin paragraph admon ---
-\paragraph{}
-
-\textbf{The above procedure is not the smartest one}. Looping over all variational parameters becomes expensive.
-Also, we don't use importance sampling and optimizations of the standard deviation (blocking, bootstrap, jackknife). 
-Such codes are included in the above Github address.
-
-
-We can also be smarter and use minimization methods to find the \textbf{optimal} variational parameters with fewer Monte Carlo cycles and then 
-fire up our heavy artillery. 
-
-One way to achieve this is to minimize the energy as function of the variational parameters.
-% --- end paragraph admon ---
-
-
-
-% !split
-\subsection*{Energy derivatives}
-
-% --- begin paragraph admon ---
-\paragraph{}
-To find the derivatives of the local energy expectation value as function of the variational parameters, we can use the chain rule and the hermiticity of the Hamiltonian.  
-
-Let us define 
-\[
-\bar{E}_{\alpha_i}=\frac{d\langle  E_L\rangle}{d\alpha_i}.
-\]
-as the derivative of the energy with respect to the variational parameter $\alpha_i$
-We define also the derivative of the trial function (skipping the subindex $T$) as 
-\[
-\bar{\Psi}_{i}=\frac{d\Psi}{d\alpha_i}.
-\]
-% --- end paragraph admon ---
-
-
-
-
-% !split
-\subsection*{Derivatives of the local energy}
 
 % --- begin paragraph admon ---
 \paragraph{}
@@ -1057,62 +348,6 @@ We can then use methods like stochastic gradient or other minimization methods t
 We have a model, our likelihood function. 
 
 How should we define the cost function?
-% --- end paragraph admon ---
-
-
-
-% !split
-\subsection*{Meet the variance and its derivatives}
-
-% --- begin paragraph admon ---
-\paragraph{Why the variance?}
-Suppose the trial function (our model) is the exact wave function. The action of the hamiltionan
-on the wave function
-\[
-   H\Psi = \mathrm{constant}\times \Psi,
-\]
-The integral which defines various 
-expectation values involving moments of the hamiltonian becomes then
-\[
-   \langle E^n \rangle =   \langle H^n \rangle =
-   \frac{\int d\bm{R}\Psi^{\ast}(\bm{R})H^n(\bm{R})\Psi(\bm{R})}
-        {\int d\bm{R}\Psi^{\ast}(\bm{R})\Psi(\bm{R})}=
-\mathrm{constant}\times\frac{\int d\bm{R}\Psi^{\ast}(\bm{R})\Psi(\bm{R})}
-        {\int d\bm{R}\Psi^{\ast}(\bm{R})\Psi(\bm{R})}=\mathrm{constant}.
-\]
-\textbf{This gives an important information: If I want the variance, the exact wave function leads to zero variance!}
-The variance is defined as 
-\[
-\sigma_E = \langle E^2\rangle - \langle E\rangle^2.
-\]
-Variation is then performed by minimizing both the energy and the variance.
-% --- end paragraph admon ---
-
-
-
-
-% !split
-\subsection*{The variance defines the cost function}
-
-% --- begin paragraph admon ---
-\paragraph{}
-We can then take the derivatives of 
-\[
-\sigma_E = \langle E^2\rangle - \langle E\rangle^2,
-\]
-with respect to the variational parameters. The derivatives of the variance can then be used to defined the
-so-called Hessian matrix, which in turn allows us to use minimization methods like Newton's method or 
-standard gradient methods. 
-
-This leads to however a more complicated expression, with obvious errors when evaluating integrals by Monte Carlo integration. Less used, see however \href{{https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.94.150201}}{Filippi and Umrigar}. The expression becomes complicated
-\[
-\bar{E}_{ij} = 2\left[ \langle (\frac{\bar{\Psi}_{ij}}{\Psi}+\frac{\bar{\Psi}_{j}}{\Psi}\frac{\bar{\Psi}_{i}}{\Psi})(E_L-\langle E\rangle)\rangle -\langle \frac{\bar{\Psi}_{i}}{\Psi}\rangle\bar{E}_j-\langle \frac{\bar{\Psi}_{j}}{\Psi}\rangle\bar{E}_i\right] +\langle \frac{\bar{\Psi}_{i}}{\Psi}E_L{_j}\rangle +\langle \frac{\bar{\Psi}_{j}}{\Psi}E_L{_i}\rangle -\langle \frac{\bar{\Psi}_{i}}{\Psi}\rangle\langle E_L{_j}\rangle \langle \frac{\bar{\Psi}_{j}}{\Psi}\rangle\langle E_L{_i}\rangle.  
-\]
-
-Evaluating the cost function means having to evaluate the above second derivative of the energy.
-% --- end paragraph admon ---
-
-
 
 
 % !split
