@@ -71,13 +71,15 @@ Monte Carlo approaches.
 \section{Introduction and motivation}
 
 Traditional many-body methods like full configuration interaction
-theory (FCI), coupled-cluster (CC) theory, many-body perturbation
-theory (MBPT), in-medium similarity renormalization group (IMSRG),
-various Monte Carlo methods and many other many-body approaches, have
-been rather successful in describing properties of interacting
-many-body systems. These methods have been widely used in condensed
-matter physics, nuclear physics, quantum chemistry and materials
-science, just to mention a few of the areas of applicability.
+theory (FCI) \cite{fcirefs}, coupled-cluster (CC) theory
+\cite{ccrefs}, many-body perturbation theory (MBPT) \cite{mbptrefs},
+in-medium similarity renormalization group (IMSRG) \cite{imsrgrefs},
+various Monte Carlo methods \cite{mcrefs} and many other many-body
+approaches, have been rather successful in describing properties of
+interacting many-body systems. These methods have been widely used in
+condensed matter physics, nuclear physics, quantum chemistry and
+materials science, just to mention a few of the areas of
+applicability.
 
 However, essentially all of these methods face what is
 normally called the curse of dimensionality. For wave function based
@@ -86,7 +88,7 @@ is discretized in terms selected basis functions and/or many-body
 excitations, the dimensionality of the systems under study grows almost
 exponentially when larger basis sets and/or number of particles are
 included. As an example, nuclear physics 
-systems close to the limits of stability pose in
+systems close to the limits of stability \cite{nplims} pose in
 particular a tough problem to many-body practitioners in terms of a dramaticn
 increase of the number of relevant degrees of freedom. To describe say
 weakly bound nuclei within the framework of a wave function based
@@ -106,18 +108,7 @@ broad fields of Machine Learning and Quantum Computing as approaches
 that hold great promise in tackling the ever increasing
 dimensionalities. There are several groups worldwide which now focus
 on Machine Learning and/or Quantum Computing applied to many-body
-problems.
-
-
-
-This work is inspired by the idea of representing the wave function with
-a restricted Boltzmann machine (RBM), presented recently by \href{{http://science.sciencemag.org/content/355/6325/602}}{G. Carleo and M. Troyer, Science \textbf{355}, Issue 6325, pp. 602-606 (2017)}. They
-named such a wave function/network a \emph{neural network quantum state} (NQS). In their article they apply it to the quantum mechanical
-spin lattice systems of the Ising model and Heisenberg model, with
-encouraging results.
-
-Here we try to implement these algorithms to many-body systems that mimick a nuclear physics like problem, namely electrons confined to move in harmonic oscillator like potentials. 
-
+problems \cite{CarleoTroyer2017}.
 Machine learning (ML) is an extremely rich field, in spite of its
 young age. The increases we have seen during the last three decades in
 computational capabilities have been followed by developments of
@@ -125,6 +116,36 @@ methods and techniques for analyzing and handling large date sets,
 relying heavily on statistics, computer science and mathematics.  The
 field is rather new and developing rapidly.
 
+Within this setting, the aim of this work is to explore similarities
+and differences between widely used many-body methods like the
+Variational Monte Carlo or the diffusion Monte Carlo approaches and
+unsupervised Machine Learning methods using so-called Boltzmann
+machines. We will also point to similarities between Monte Carlo
+approaches with shadow wave functions and Machine Learning algorithms
+that employ Boltzmann machines. Since the field of Machine Learning is
+evolving rather rapidly and physicists may not be fully familiar with
+the plethora of Machine Learning algorithms, we will try in this
+work to keep a more pedestrian approach. In particular, we will try to outline 
+some of the similarities between Monte Carlo methods for solving quantum mechanical many-body problems and Machine Learning algorithms. 
+
+We start thus with a brief review of central aspects of Monte Carlo
+methods in the next section. Our model system is that of electrons
+confined to move in two or three dimensions, so-called quantum
+dots. We will in particular focus on idealized quantum dots with
+electrons moving in a harmonic oscillator potential. There are several
+reasons for focusing on quantum dots. For two interacting electrons
+there are analytical eigenpairs, allowing us thereby to benchmark
+various many-body methods \cite{taut1993,taut1994}. For more than two
+electrons, there are extensive reference calculations based on a
+variety of many-body methods. These calculations, in addition to new
+ones presented here, will allow us to assess the relevance of our
+results obtained with Machine Learning algorithms. 
+
+Thereafter, in Section \ref{sec:MLmethods}, we present and discuss the implementation of Machine Learning algorithms. In that section we present also a discussion of possible similarities between Boltzmann machines and so-called Shadow wave functions. 
+
+
+
+\section{What is Machine Learning}
 
 Almost every problem in ML and data science starts with the same ingredients:
 \begin{itemize}
@@ -138,7 +159,6 @@ Almost every problem in ML and data science starts with the same ingredients:
 \noindent
 We seek to minimize the function $\mathcal{C} (\mathbf{x}, f(\mathbf{\alpha}))$ by finding the parameter values which minimize $\mathcal{C}$. This leads to  various minimization algorithms.
 
-\section{What is Machine Learning}
 Machine learning is the science of giving computers the ability to
 learn without being explicitly programmed.  The idea is that there
 exist generic algorithms which can be used to find patterns in a broad
