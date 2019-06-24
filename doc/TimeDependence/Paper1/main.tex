@@ -12,22 +12,40 @@
 \usepackage{hyperref}
 \usepackage{pgfplots}
 \usepackage{bbold}
+\usepackage{physics}
+\usepackage{csquotes}
+\usepackage{commath}
 
 \usetikzlibrary{external}
 \tikzexternalize[prefix=figures/]
 
+%\tikzset{external/system call={latex \tikzexternalcheckshellescape -halt-on-error
+%-interaction=batchmode -jobname "\image" "\texsource" &&
+%dvips -o "\image".ps "\image".dvi}}
+
 \pgfplotsset{compat=1.15}
 
 
+\newcommand{\refslat}{\Phi}
+\newcommand{\oneten}{h}
+\newcommand{\twoten}{u}
 \renewcommand{\vec}[1]{\boldsymbol{#1}}
 \newcommand{\hamiltonian}{\hat{H}}
-\newcommand{\onehamil}{\hat{h}}
-\newcommand{\twohamil}{\hat{u}}
+\newcommand{\onehamil}{\hat{\oneten}}
+\newcommand{\twohamil}{\hat{\twoten}}
+\newcommand{\para}[1]{\left( #1 \right)}
+\newcommand{\brak}[1]{\left[ #1 \right]}
+\newcommand{\brac}[1]{\left\{ #1 \right\}}
+\newcommand{\ccr}[1]{\hat{c}_{#1}^{\dagger}}
+\newcommand{\can}[1]{\hat{c}_{#1}}
+\newcommand{\vac}{\text{vac}}
 
 \newcommand{\vconf}{\hat{v}_{\text{conf}}}
 \newcommand{\vfield}{\hat{v}_{\text{field}}}
 \newcommand{\envelope}{\vec{\mathcal{E}}}
 \newcommand{\polarization}{\vec{\epsilon}}
+\newcommand \mycomment[1]   {{\color{red} [{\it {#1}}]}}
+\newcommand{\todo}{$\square$}
 
 \begin{document}
 
@@ -57,23 +75,6 @@
 \end{abstract}
 
 \maketitle
-
-\section{TODO}
-\begin{itemize}
-    \item How do you treat the centre of mass problem???
-    \item The harmonic potential theorem\cite{HarmonicPotentialTheorem}: this depends on basis size! One way to check this is to let $u^{pq}_{rs} = 0$ and use a small number of basis functions. The short story: the particle density (in time) is rigidly translated when the confining potential is harmonic and the applied field is the simple dipole laser we use! 
-    \item Furthermore, if I read correctly, we should observe that the (for example) the time dependent energy is effectively the same as for a single particle problem. 
-    
-    Quote from\cite{Chakraborty}: "In conclusion, the interaction of electrons in quantum
-dots leads to rich structure in their energy spectrum.
-However, FIR spectroscopy cannot probe it when the
-confining potential is quadratic because the optical excitations are then excitations of the cm and have exactly
-the same energies as single-electron excitations."
-    
-    This is (again, if I understand the implications of the harmonic potential theorem correctly) due to the fact that the Hamiltonian separates into relative and center of mass coordinates with a harmonic potential and this type of applied field. This effect is independent of the number of particles. If we can actually demonstrate this, it is very solid foundation for claiming the correctness of the implementation. This also says something about the quality of the basis set. 
-    \item Basically, what I am trying to say is that the "shape" of computed values (energy, overlap, expectation value of dipole, etc) is independent of the number of particles and will look like the corresponding values of the single particle problem apart from a scaling due to the number of particles. 
-    \item Thus, it is maybe sensible to include comparisons with the single particle problem (which can be solved analytically or on a grid with f. ex RK4).
-\end{itemize}
 
 \section{Introduction}
 Quantum mechanics is a theory that describes/models the properties of microscopic systems. It postulates that given the so-called wavefunction,
@@ -117,319 +118,365 @@ In a recent article \cite{OATDCC_2012}, Simen Kvaal put forward a generalization
 We will apply several of the methods above in order to study electron dynamics in one- and two-dimensional quantum dot models. In particular, we will make a comparative analysis of the TDHF, TDCC (OATDCC) and TDFCI methods. 
 
 \section{Theory}
-We assume that the reader is familiar with second-quantization/occupation-number theory. For a comprehensive introduction see for example \cite{szabo1996modern,helgaker2008molecular, shavitt2009many}. 
-\subsection{Hartree-Fock Theory}
-In the Hartree-Fock approximation, the Hamiltonian reduces to a one-body term and a two-body term, written in the simplest way using second quantisation as
-\begin{equation}
-    \hat{H} = \hat{h} + \hat{u} 
-    = h^{p}_{q}c^\dagger_p c_q + \frac{1}{4}u^{pq}_{rs}c^\dagger_p c^\dagger_q c_s c_r
-\end{equation}
-
-and the expected value of the Hamiltonian is given by
-\begin{equation}
-    \label{HF_expecation}
-    E[\Phi] = \bra{\Phi}\hat{H}\ket{\Phi} 
-    = \bra{\phi_i}\hat{h}\ket{\phi_i} + \frac{1}{2}\bra{\phi_i\phi_j}\hat{u}\ket{\phi_i\phi_j}_{\text{AS}}
-\end{equation}
-where the assumption is that the ground state can be represented by a single Slater determinant
-\begin{equation}
-    \ket{\Phi} = \prod_{i=1}^{N} c^\dagger_i \ket{\text{vac}} = \ket{\phi_1 \dots \phi_N}.
-\end{equation}
-
-It can be shown that a Slater determinant wavefunction $\ket{\Phi_\text{HF}} = \ket{\phi_i \dots \phi_N}$ is a variational minimum of the function for $E[\Phi]$ in \autoref{HF_expecation} if the single-particle functions $\ket{\phi_i}$ that make up this Slater determinant satisfy the canonical Hartree-Fock equations,
-\begin{equation}
-    \label{canonical_HF}
-    \hat{f}(\phi_1, \dots , \phi_N)\ket{\phi_i} = \epsilon_i \ket{\phi_i}.
-\end{equation}
-where $\hat{f}$ is a one-body operator called the Fock operator,
-\begin{equation}
-    \hat{f}(\phi_1, \dots \phi_N) \equiv \hat{h} + \hat{v}_{\text{HF}},
-\end{equation}
-wherein the most important point of the Hartree-Fock approximation is revealed - one constrains the problem to a one-body problem where each particle only experiences a mean field from the other particles in the system. The canonical Hartree-Fock equations (\autoref{canonical_HF}) is reformulated as a matrix eigenvalue problem. This eigenvalue equation is called the Roothan-Hall equations,
-\begin{equation}
-    \label{roothan_hall}
-    F(U)U = U\epsilon,
-\end{equation}
-which is solved iteratively until self-consistency is reached, i.e. the next iteration does not contribute a significant amount to the mean field of the system.
-
-\subsubsection{Time-Dependent Hartree-Fock}
-
-We now assume that the Hamiltonian is time-dependent, satisfying the time-dependent Schrödinger equation (\autoref{TDSE}),
-\begin{equation}
-    \hat{H}(t) = \hat{h}(t) + \hat{u}(t).
-\end{equation}
-
-In time dependent Hartree-Fockn(TDHF) the wavefunction is approximated by a single Slater determinant, $\ket{\Phi(t)}$, where the orbitals $\ket{\phi_p(t)}$ are time dependent. The equations of motion for the orbitals are found by demanding that the action functional 
-\begin{equation}
-    \mathcal{S}[\ket{\phi_p(t)}] = \int_0^T \mathcal{L} dt 
-\end{equation}
-is stationary with respect to variations of the orbitals, i.e $\delta \mathcal{S} = 0$. This is referred to as the Lagrange formulation of the time dependent variational principle\cite{Hochstuhl2014}. 
-
-The Lagrangian $\mathcal{L}$ is given by 
-\begin{equation}
-    \mathcal{L} = \bra{\Phi(t)} \hat{H} - i\hbar \frac{\partial}{\partial t} \ket{\Phi(t)} 
-    - \lambda_{ij}(t)\left(\braket{\phi_i(t)|\phi_j(t)} - \delta_{ij}\right),
-\end{equation}
-where the Lagrange multipliers $\lambda_{ij}(t)$ enurses orthonormality of the orbitals. 
-
-Computing the variations  with respect to the orbitals (see appendix \ref{TDHF_Derivation} for details) we obtain the TDHF equations 
-\begin{equation}
-    i \hbar \frac{\partial}{\partial t} \ket{\phi_p(t)} = \hat{f}(t) \ket{\phi_p(t)}.
-\end{equation}
-
-\subsection{Configuration Interaction Theory}
-
-(This section is a bit informal, but at least there is something here.)
-
-Configuration Interaction relies on representing the wavefunction as an expansion of orthonormal slater determinants built from a set of orthonormal single-particle functions,
-\begin{equation}
-    \label{hierarchical_CI}
-    \ket{\Psi} = A_0\ket{\Phi} + \sum_{ia}A^a_i\ket{\Phi^a_i} 
-    + \frac{1}{4}\sum_{ij} \sum_{ab} A^{ab}_{ij}\ket{\Phi^{ab}_{ij}} + \dots
-\end{equation}
-One may choose to truncate the computation in the hierarchical manner (e.g. stopping at the dots in \autoref{hierarchical_CI} would be CISD) or include all Slater determinants generated by the first $L$ single-particle functions $\phi_0$ through $\phi_{L-1}$. This gives a space of dimension $\binom{L}{N}$, and is called the full configuration interaction space (FCI space).
-
-Inserting the CI wavefunction into the TISE yields
-\begin{align}
-    \sum_{K}\hat{H} A_{KJ} \ket{\Phi_K} &= \sum_{K} E_J A_{KJ} \ket{\Phi_K} \\
-    \sum_{K} A_{KJ} \bra{\Phi_I}\hat{H} \ket{\Phi_K} &= \sum_{K} E_J A_{KJ} \bra{\Phi_I}\Phi_K\rangle \\
-    HA &= AE,
-\end{align}
-where $H$ is a matrix reprentation of the Hamiltionian, and $A$ is a matrix containing the CI expansion coefficients.
-
-\subsubsection{Time-Dependent Configuration Interaction}
-Time-development is simply a matter of inserting one's CI expansion (\autoref{hierarchical_CI}) into the TDSE (\textcolor{blue}{Haakon:} formally we can use the time dependent variational principle, minimize/compute variations wrp. to CI coeffs and get the same equation),
-\begin{align}
-    i\hbar \sum_I \frac{\partial A_I(t)}{\partial t} \ket{\Phi_I} &= \sum_I A_i(t) \hat{H}(t) \ket{\Phi_I} \\
-    i \hbar \sum_I \frac{\partial A_I(t)}{\partial t} \bra{\Phi_J}\Phi_I\rangle &= \sum_I A_I(t) \bra{\Phi_J} \hat{H}(t) \ket{\Phi_i} \\
-    i\hbar \frac{\partial A_I(t)}{\partial t} &= H(t)A(t).
-\end{align}
-We find a relatively simple, yet large, set of equation on matrix form. One is now free to apply one's favourite numerical integration scheme in order to compute the time-development.
-
-\subsection{Coupled Cluster Theory}
-    
-    Full Configuration Interaction (FCI) will provide you with an exact solution, but since the FCI space grows Pascal-triangularly (Question: Is the growth exponential when the growth does not follow an exponential function?) and because we are constrained by limited amount of computing power, FCI is not practically feasible. The Hartree-Fock method, on the other hand, approximates systems by ignoring electron-electron interaction and can therefore be quite inaccurate. Coupled Cluster to the rescue! Hurray. Coupled cluster cleverly include higher-order excitations and takes electron correlation effects into account. Time-developed coupled cluster (TDCC) can be tricky, however. 
-    
-    \subsubsection{Ground State coupled cluster}
-    In coupled cluster theory we employ an exponential ansatz for the $N$-particle correlated wavefunction 
-    \begin{equation}
-       \ket{\Psi_{\text{CC}}} = e^{\hat{T}}\ket{\Phi} 
-    \end{equation}
-    where $\ket{\Phi}$ is a reference state, typically the HF-state. The cluster operator $\hat{T} = \sum_{k=1}^N \hat{T}_k$ is a sum of $k$-particle $k$-hole excitation operators, $\hat{T}_k$, 
-    \begin{equation}
-        \hat{T}_k = \left(\frac{1}{k!}\right)^2 \sum_{abc\cdots ijk\cdots} \tau^{abc\cdots}_{ijk\cdots}   c_a^\dagger  c_i c_b^\dagger c_j  c_c^\dagger c_k \cdots 
-    \end{equation}
-    where the unknowns $\tau^{abc\cdots}_{ijk\cdots}$ are referred to as cluster amplitudes. The operators $\hat{T}_1, \hat{T}_2, \hat{T}_3, \cdots$ and corresponding amplitudes $\tau^a_i, \tau^{ab}_{ij}, \tau^{abc}_{ijk},\cdots$ are referred to as singly, doubly, triply-, etc excited operators and amplitudes respectively.
-    
-    Insertion of the exponential ansatz into the time independent Schrödinger equation results in 
-    \begin{equation}
-        \hat{H}e^{\hat{T}} \ket{\Phi} = E e^{\hat{T}} \ket{\Phi}.
-    \end{equation}
-    Multiplying with $e^{-T}$ we have that 
-    \begin{equation}
-        \bar{H}_{CC} \ket{\Phi} = E \ket{\Phi} \label{SimTransSE},
-    \end{equation}
-    where we have defined the similarity transformed Hamiltonian 
-    \begin{equation}
-        \bar{H}_{CC} \equiv e^{-\hat{T}}\hat{H}e^{\hat{T}}.
-    \end{equation}
-    
-    Projecting equation (\ref{SimTransSE}) with the reference or any excited determinant gives 
-    \begin{align}
-        E_{CC} &= \braket{\Phi|\bar{H}_{cc}|\Phi} \label{CCenergy} \\
-        0 &= \braket{\Phi^\mu|\bar{H}_{cc}|\Phi} \label{AmplitudeEqsCC},
-    \end{align}
-    where $\mu$ denotes a generic excitation. Eq. (\ref{CCenergy}) is the coupled cluster energy, while eq. (\ref{AmplitudeEqsCC}) defines a set of nonlinear equations for the unknowns cluster amplitudes. In the limit where $\hat{T}$ is not truncated eqs. (\ref{CCenergy}) and (\ref{AmplitudeEqsCC}) is equivalent to the full configuration-interaction method\cite{VarCC_2013}.
-    
-    (BCH-expansion of $\bar{H}$)!
-    
-    It is important to note that since $\hat{T} \neq \hat{T}^\dagger$, the CC-energy is non-variational, i.e 
-    \begin{equation}
-        E_{CC} = \braket{\Phi|e^{-T}\hat{H}e^{T}|\Phi} \neq \braket{\Phi|e^{T^\dagger}\hat{H}e^{T}|\Phi} 
-    \end{equation}
-    and is not guaranteed to give an upper bound on the energy when $\hat{T}$ is truncated. Working directly with the expression $e^{T^\dagger}\hat{H}e^{T}$ is impractical since it does not truncate after four nested commutators as opposed to $\bar{H}$.
-    
-    Since CC is non-variational the question of how to compute expectation values other than the energy arises. The usual definiton of the expectation value of an operator, A, is given by 
-    \begin{equation}
-        \braket{A} = \braket{\Psi|\hat{A}|\Psi}.
-    \end{equation}
-    However, we have seen that $\ket{\Psi}^\dagger \neq \bra{\Phi}e^{-\hat{T}}$ such that $E_{CC} \neq \braket{H}$.
-    
-    The solution to this problem was introduced independently by workers in quantum chemistry and in theoretical physics\cite{VarCC_2013}.
-    
-    The idea is to introduce independent paramterizations of the ket- and bra state, $\bra{\tilde{\Psi}} \neq \ket{\Psi}^\dagger$. [Work in progress...]
-    
-    
-    \subsubsection{The time dependent bivariational principle}
-    (ASSUMING THE PREVIOUS SECTION IN PLACE)! 
-    
-    The extension of CC-theory to the time domain can be done through a generalization of the time dependent variational principle\cite{BECK2001}, to a corresponding time dependent bivariational principle\cite{OATDCC_2012}.
-    
-    Consider the action-like functional 
-    \begin{align}
-    \mathcal{S}[\bra{\tilde{\Psi}}, \ket{\Psi}] &= \int_0^T \braket{\tilde{\Psi}(t)|i\frac{d}{dt}-\hat{H}(t)|\Psi(t)} dt  \nonumber \\ 
-    &= \int_0^T \braket{\tilde{\Phi}(t)|(\mathbb{1}+\hat{\Lambda}(t))e^{-\hat{T}(t)}\left(i\frac{d}{dt}-\hat{H}(t)\right) e^{\hat{T}(t)}|\Phi(t)} dt \nonumber 
-    \end{align}
-    where the Hamiltonian generally is time dependent. The integrand can be written more compactly as 
-    \begin{align}
-        &\braket{\tilde{\Phi}(t)|(\mathbb{1}+\hat{\Lambda}(t))e^{-\hat{T}(t)}\left(i\frac{d}{dt}-\hat{H}(t)\right) e^{\hat{T}(t)}|\Phi(t)} \nonumber \\ 
-        = \ \ & i \lambda_\mu \dot{\tau}^\mu + \rho^q_p \left( h^p_q - i \eta^p_q \right) + \frac{1}{4}u^{pr}_{qs}\rho^{qs}_{pr}  \\
-        =\ \ & i \lambda_\mu \dot{\tau}^\mu - \mathcal{E}_{\hat{H}-iD_0}[\lambda, \tau] 
-    \end{align}
-    where we have defined 
-    \begin{align}
-        D_0 &= \braket{\tilde{\varphi}_p|\dot{\varphi}_q} c_p^\dagger \tilde{c}_q \\
-        \eta^p_q &= \braket{\tilde{\varphi}_p|\dot{\varphi}_q}.
-    \end{align}
-    
-    Thus, 
-    \begin{align}
-        \mathcal{S}[\bra{\tilde{\Psi}}, \ket{\Psi}] &= \int_0^T i \lambda_\mu \dot{\tau}^\mu + \rho^q_p \left( h^p_q - i \eta^p_q \right) + \frac{1}{4}u^{pr}_{qs}\rho^{qs}_{pr} dt \\
-        &= \int_0^T i \lambda_\mu \dot{\tau}^\mu - \mathcal{E}_{\hat{H}-iD_0}[\lambda, \tau] dt
-    \end{align}
-    
-    The time dependent bivariational principle states that equations of motion are obtained by demanding that $\mathcal{S}$ is stationary ($\delta S = 0$) with respect to all independent variations of the parameters. Genraly both amplitudes and single-particle function/orbitals can be varied. 
-    \subsubsection{Time dependent amplitude equations}
-    The equations of motions for the amplitudes read 
-    \begin{align}
-    i \dot{\tau}^\mu &= \frac{\partial}{\partial \lambda_\mu} \mathcal{E}_{\hat{H}-iD_0}[\lambda, \tau] \nonumber \\ 
-    &=  \braket{\tilde{\Phi}_\mu|e^{-\hat{T}}(\hat{H}-iD_0)e^{\hat{T}}|\Phi} \label{OATDCC_tau_equations} \\
--i \dot{\lambda}_\mu &= \frac{\partial}{\partial \tau^\mu} \mathcal{E}_{\hat{H}-iD_0}[\lambda, \tau] \nonumber \\ 
-&=  \braket{\tilde{\Phi}|(1+\Lambda)e^{-\hat{T}}[\hat{H}-iD_0,X_\mu]e^{\hat{T}}|\Phi} \label{OATDCC_lambda_equations}
-\end{align}
-
-The right-hand sides of equations [\ref{OATDCC_tau_equations}, \ref{OATDCC_lambda_equations}] are the same amplitude equations as in time independent cc-theory, plus an extra term due to the time dependence of the orbitals. 
-
-If the orbitals are chosen to be stationary\cite{Symplectic_TDCC_2018}, we have $D_0 = 0$ and the time dependence is determined by the amplitudes. This implies a static reference such as the Hartree-Fock determinant. In that case, we also have that $\bra{\tilde{\Phi}} = \bra{\Phi} $, i.e an orthonormal basis.
-
-\subsubsection{Time dependent orbital equations}
-Computing the variations of $\mathcal{S}$ with respect to the orbitals, we obtain equations of motion for the time-dependent orbitals. The time derivatives of the orbitals can, in general, be split into a P-space and a Q-space, 
-\begin{align}
-    \ket{\dot{\varphi}_q} &= (P+Q)\ket{\dot{\varphi}_q} = \sum_p \eta^p_q \ket{\varphi_p} + Q\ket{\dot{\varphi}_q} \\
-    \bra{\dot{\tilde{\varphi}}_q} &= \bra{\dot{\tilde{\varphi}}_q}(P+Q) = -\sum_q \eta^p_q \bra{\tilde{\varphi}_q} + \bra{\dot{\tilde{\varphi}}_p}Q
-\end{align}
-where we have defined 
-\begin{align}
-    P &= \sum_{p=1}^M \ket{\varphi_p}\bra{\tilde{\varphi}_p},  \ \ M \leq N_b \\
-    Q &= \mathbb{1}-P
-\end{align}
-with $N_b$ denoting the number of single-particle functions. 
-
-This splitting is identical to what is done in MCTDHF-theory \cite{Hochstuhl2014}, where a trunctation of the $P$-space is used to reduce the number of Slater determinants the expansion of the CI-wavefunction. 
-
-In coupled cluster methods the number of Slater determinants is reduced through the truncation of the cluster operators. Thus, we can choose to have $M=N_b$, resulting in $Q=0$. In the following we restrict our attention to the case where $Q=0$.
-
-Note that for the MCTDHF method this would be the same as FCI with time dependent orbitals and nothing is gained in terms of reducing computational complexity.  
-
-With $Q=0$ the equations of motion for the orbitals is given by
-\begin{align}
-    \ket{\dot{\varphi}_q} &=  \sum_p \eta^p_q \ket{\varphi_p} \label{Reduced ket-orbital equation} \\
-    \bra{\dot{\tilde{\varphi}}_q} &=  -\sum_q \eta^p_q \bra{\tilde{\varphi}_q} \label{Reduced bra-orbital equation}. 
-\end{align}
-The non-zero components of $\eta^p_q$ are given by the solutions of the linear equations
-\begin{align}
-    i \sum_{bj} A^{ib}_{aj} \eta^j_b &= \sum_j \rho^i_j h^j_a - \sum_b \rho^b_a h^i_b \nonumber \\
- + &\frac{1}{2} \left[\sum_{prs} \rho^{is}_{pr} u^{pr}_{as} - \sum_{rqs} \rho^{qs}_{ar} u^{ir}_{qs}  \right] \\
-    -i \sum_{bj} A^{ja}_{bi} \eta^b_j &= \sum_b \rho^a_b h^b_i - \sum_j \rho^j_i h^a_j \nonumber \\
- + &\frac{1}{2} \left[ \sum_{prs} \rho^{as}_{pr} u^{pr}_{is} - \sum_{rqs} \rho^{qs}_{ir} u^{ar}_{qs} \right] \nonumber \\ 
- + &i \dot{\rho}_i^a \label{P-space bra equation}
-\end{align}
-where
-\begin{align}
-    A^{ib}_{aj} &= \braket{\tilde{\Psi}|[c_j^\dagger c_b,c_a^\dagger c_i]|\Psi} \nonumber \\
-    &= \delta^b_a \rho^i_j - \delta^i_j \rho^b_a \nonumber  \\ 
-    &= -A^{bi}_{ja}.
-\end{align}
-
-The simplest OATDCC case is the OATDCCD approximation where the cluster operators include double excitations only. One can show that the singles amplitudes are formally redundant \cite{OATDCC_2012}, leaving the one-body density matrix block diagonal, with only $\rho^i_j$ and $\rho^a_b$ being non-zero. Thus, the last term in eq. (\ref{P-space bra equation}) is zero. 
-
-Furthermore, there is no contributions to the amplitude equations (\ref{OATDCC_tau_equations}) and (\ref{OATDCC_lambda_equations}) from $D_0$ in the doubles-only approximation. This follows from that only $\eta^a_i$ and $\eta^i_a$ are non-zero.
-
-
-\section{Systems}
-    Relevant articles:
+    \mycomment{I want to condense the theory section significantly and focus on the results. Much of the material can be referenced, however the time dependent coupled cluster part most likely needs some attention.}
     \begin{itemize}
-        \item Simple spin-dependent field TDHF study:\cite{TDHF_Singlet_Triplet}
-        \item One dimensional time-dependent quantum dot: \cite{Zanghellini04}
-        \item Harmonic single well: \cite{HjorthJensenQD_2017}
-        \item Theoretical study double well: \cite{Double_Well_2000}
-        \item Experiment with two fermions in double well: \cite{Fermions_Double_Well_Experiment}
-        \item Coupled double well: \cite{Coupled_double_wells}
-        \item Time domain two electrons in quantum dot: \cite{TimeDomainTwoElectronsQuantumDot}
-        \item Time-dependency with spin-orbit coupling: \cite{Spin_orbit_coupling}
-        \item Time-domain simulation of quantum spin: \cite{Time_domain_quantum_spin}
-        \item Entanglement in spin-qubit quantum dots: \cite{Entanglement_spin_qubit_quantum_dots}
+        \item Suggested structure
+        \begin{itemize}
+            \item [\todo] Second quant/occ-number theory: Define notation for creation/annihilation ops, Slater dets, particle/hole indices.
+            \item[\todo] Groundstate methods: One compact subsection covering ground state methods with relevant reference(s). Morten et. al \cite{HjorthJensenQD_2017} covers all relevant methods. Make clear that they are used to generate the initial condition. 
+            \item [\todo] Define how to compute expectation values using density matrices for all methods.
+            \item [\todo] Comment that spectrum is obtained Fourier transformation of time-dependent dipole moment after laser pulse/electric field is turned off.
+            \item [\todo] TDHF and TDFCI (extreme opposites in this context) covered in one subsection. Reference time dependent variational principle (both methods can be derived from this) and state the equations with relevant reference (Hochstuhl review).
+            \item [\todo] Pragmatic approach: define relevant quantities from TDCC but reference main body of theory.
+        \end{itemize}
     \end{itemize}
     
-    Generic information on quantum dots and why we are interested in them.
+    \subsection{Second quantization/occupation-number theory}
+    We assume that the reader is familiar with second-quantization/occupation-number theory. For a comprehensive introduction see for example \cite{szabo1996modern,helgaker2008molecular, shavitt2009many}.
     
+    We will denote the general electronic Hamiltonian in its second quantized form relative to a given single-particle basis $\brac{\phi_p}_{p = 1}^{L}$ by
+    \begin{equation}
+        \hat{H} = \onehamil + \twohamil
+        = h^{p}_{q}\ccr{p} \can{q} + \frac{1}{4}u^{pq}_{rs}\ccr{p} \ccr{q} \can{s} \can{r}
+    \end{equation}
+    where $c_p^{\dagger},c_p$ denote creation and annihilation operators respectively.
     
-    General Hamiltonian for interacting electrons in a (time-dependent) confining potential influenced by an external electric field (laser),
+    The quantities $h^p_q$ and $u^{pq}_{rs}$ are referred to as matrix elements and are defined by
+    \begin{gather}
+        \oneten^{p}_{q} \equiv \bra{\phi_p}\onehamil\ket{\phi_q}, \\
+        \twoten^{pq}_{rs} \equiv \bra{\phi_p\phi_q}\twohamil\ket{\phi_r\phi_s}_{AS}.
+    \end{gather}
+    The subscript $AS$ denotes that $u^{pq}_{rs}$ is antisymmetrized according to
     \begin{align}
-    \hat{H}(t) = &\sum_{i=1}^N \left( - \frac{1}{2}\nabla^2 + \vconf(\mathbf{r}_i,t) + \vfield(\mathbf{r}_i,t) \right) \nonumber \\ 
-    + &\sum_{i < j}^N \frac{1}{r_{ij}}.
-    \label{eq:general_hamiltonian}
+        \twoten^{pq}_{rs}
+        \equiv
+        \bra{\phi_p\phi_q}\twohamil\ket{\phi_r\phi_s}
+        -
+        \bra{\phi_p\phi_q}\twohamil\ket{\phi_s\phi_r}.
+    \end{align}
+    Typically $u^{pq}_{rs}$ is assumed to be antisymmetric and the subscript AS is omitted.
+    
+    Einstein summation convention with summation over repeated indices is understood.
+    The position of the indices, i.e., raised or lowered, does not matter.
+    
+    Furthermore we denote the reference state, also known as the \emph{Fermi vacuum}, by the single Slater determinant
+    \begin{align}
+        \ket{\refslat}
+        =
+        \prod_{i = 1}^{N}\ccr{i}\ket{\vac}
+        = \ket{\phi_1 \dots \phi_N},
+        \label{eq:ref-state}
+    \end{align}
+    where $\ket{\vac}$ is the vacuum state, and $N$ is the number of occupied single particle states. 
+    
+    The expectation value of the Hamiltonian with the reference state defines the so-called \emph{reference energy}
+    \begin{equation}
+        E_\text{ref} = \bra{\Phi}\hat{H}\ket{\Phi} 
+        = \oneten^{i}_{i} + \frac{1}{2} \twoten^{ij}_{ij}.
+        \label{eq:ref-energy}
+    \end{equation}
+    
+    It is customary to use the indices $i, j, k, l, \dots$ as placeholders for the occupied states and $a, b, c, d, \dots $ for virtual states. A general single-particle state is denoted by $p, q, r, s, \dots$.
+    
+    Using the creation and annihilation operators we can generate \emph{singly, doubly, triply,...} excited determinants defined by
+    \begin{align}
+        \ket{\Phi^a_i} &\equiv c_a^\dagger c_i \ket{\Phi} \\
+        \ket{\Phi^{ab}_{ij}} &\equiv c_a^\dagger c_i c_b^\dagger c_j \ket{\Phi} \\
+        &\vdots
     \end{align}
     
-    \subsection{One dimensional quantum dot}
-        We will use the one-dimensional quantum dot model considered by Zanghellini et. al in \cite{Zanghellini04}, as a benchmark/validation for our implementations.
+    Assuming that the single-particle functions are orthonormal, the reference state along with the excited determinants form an orthonormal basis for the many-body problem. Thus, in principle, any $N$-particle wavefunction can be expanded in the Slater determinants as  
+    \begin{equation}
+        \ket{\Psi} = C_0 \ket{\Phi} + \sum_{ia} C^a_i \ket{\Phi^a_i} + \frac{1}{4} \sum_{ijab} C^{ab}_{ij} \ket{\Phi^{ab}_{ij}} + \cdots .
+    \end{equation}
     
-    \subsection{Two dimensional quantum dot}
-        For a two dimensional quantum dot model we will consider different confining potential. There already exists studies concerning the ground state properties the electrons are confined by the harmonic oscillator potential, see for example \cite{HjorthJensenQD_2017}. We will use this as a starting point for time-dependent studies.
-    \subsubsection{Single well}
-        The Hamiltonian of the two-dimensional harmonic oscillator quantum dot is given by \autoref{eq:general_hamiltonian}, with the confining potential
-        \begin{align}
-            \vconf(\boldsymbol{r}_i) \equiv \frac{1}{2} \omega^2 \boldsymbol{r}_i^2.
-        \end{align}
-    \subsubsection{Double well}
-    \subsection{Open system/finite potential wells}
-        Maybe too ambitious in this work.
+    \subsection{Ground state methods}
+    Before we can do any time evolution, we need to define an initial condition/initial state. A common approach is to take ground state of the system under consideration as initial condition. Thus, we must first solve the time independent Schrödinger equation (TDSE)
+    \begin{equation}
+        \hat{H} \ket{\Psi} = E \ket{\Psi}
+    \end{equation}
+    for the ground state.
+    
+    We will consider three of the most common many-body methods and their time dependent generalizations, namely the Hartree-Fock, coupled-cluster and configuration-interaction method. 
+    
+    \subsubsection{Hartree-Fock theory}
+    In Hartree-Fock theory the wavefunction is assumed to be described by the \emph{single} Slater determinant $\ket{\Phi}$ that minimizes the energy functional
+    \begin{equation}
+        E[\Phi] = \bra{\Phi}\hat{H}\ket{\Phi}.
+    \end{equation}
+    Minimization of $E[\Phi]$ subject to the constraint that the single-particle functions are orthonormal, leads to the Hartree-Fock equations 
+    \begin{equation}
+            \label{canonical_HF}
+            \hat{f}(\phi_1, \dots , \phi_N)\ket{\phi_i} = \epsilon_i \ket{\phi_i}.
+    \end{equation}
+    where $\hat{f}$ is the so-called the Fock operator,
+    \begin{equation}
+            \hat{f}(\phi_1, \dots \phi_N) \equiv \hat{h} + \hat{v}_{\text{HF}}.
+    \end{equation}
+    The most important point of the Hartree-Fock approximation is that it constrains the problem to a one-body problem where each particle only experiences a mean field from the other particles in the system.
+    
+    The single-particle functions satisfying eq. \ref{canonical_HF} are referred to as Hartree-Fock single-particle functions. In practice it is most common to expand these functions in some fixed basis $\{\chi_p\}_{p=1}^L$  
+    \begin{equation}
+        \ket{\phi_i} = \sum_p U_{p i} \ket{\chi_p}.
+    \end{equation}
+    Insertion of this expansion into eq. \ref{canonical_HF} leads to the eigenvalue equation known as the Roothan-Hall equation 
+    \begin{equation}
+        FU = U\mathcal{E} 
+    \end{equation}
+    where $F_{pq} = \bra{\chi_p}\hat{f}\ket{\chi_q}$ and $\mathcal{E} = \text{diag}(\epsilon_1,\cdots,\epsilon_L)$.
+    
+    \subsubsection{Configuration Interaction Theory}
+    
+    In configuration-interaction the wavefunction is taken as a linear combination of Slater determinant basis functions generated from a set of single-particle functions $\{\phi_p \}_{p=1}^L$
+    \begin{align}
+        \label{hierarchical_CI}
+        \ket{\Psi} &= C_0\ket{\Phi} + \sum_{ia}C^a_i\ket{\Phi^a_i} 
+        + \frac{1}{4}\sum_{ij} \sum_{ab} C^{ab}_{ij}\ket{\Phi^{ab}_{ij}} + \dots \nonumber \\
+        &= \sum_{I=1}^{N_\text{sd}} C_I \ket{\Phi_I}
+    \end{align}
+    where $\ket{\Phi_I}$ denotes a general Slater determinant.
+    
+    One may choose to truncate the computation in the hierarchical manner (e.g. stopping at the dots in \autoref{hierarchical_CI} would be CISD) or include all Slater determinants generated by the first $L$ single-particle functions $\phi_1$ through $\phi_{L}$. This gives a space of dimension 
+    \begin{equation}
+    N_\text{sd} = \binom{L}{N},    
+    \end{equation} and is called the full configuration interaction space (FCI space). 
+    
+    Minimization of the energy functional 
+    \begin{equation}
+        E[\Psi] = \bra{\Psi} \hat{H} \ket{\Psi}
+    \end{equation}
+    with respect to the expansion coefficients $C_I$ leads to the eigenvalue problem\cite{szabo1996modern}    
+    \begin{equation}
+        HC = C\mathcal{E}
+    \end{equation}
+    where $H_{IJ} = \bra{\Phi_I}\hat{H}\ket{\Phi_J}$ and $\mathcal{E}$ is a diagonal matrix containing the eigenvalues/eigenenergies.
+    
+    In principle the FCI solution defines the eaxact solution in the computational space defined by the single particle functions $\{\phi_p \}$. However, due to the rapid growth of the number of Slater determinants, FCI calculations are possible only for (very) small systems. Nevertheless, FCI provides us with an invaluable way to benchmark other methods since it provides an exact solution.
+    
+    One way to deal with the rapid growth of the Slater determinant space is to truncate the FCI expansion at, for example, the doubles level. This has the drawback that the resulting wavefunction no longer is size-consistent\cite{shavitt2009many}.
+    
+    The solution to this problem is resolved by the coupled cluster method.
+    
+    \subsubsection{Coupled cluster theory}
+    \mycomment{Den gamle CC seksjonen er flyttet til enden av dokumentet. Mista oversikten.}
+    \begin{itemize}
+        \item [\todo] Define exponential ansatz and cluster ops
+        \item [\todo] Define CC-energy and amplitude equations
+        \item [\todo] Possibly introduce bivar principle here, i.e CC-energy minimizes the CC-Lagrangian. Makes transition to time smoother (I think).
+        \item [\todo] Define $\lambda$-amplitudes and CC-expectation values/density operators
+        \item [\todo] Comment that CC is non-variational
+        \item [\todo] Comment that CC is size-consistent
+    \end{itemize}
+    
+    \subsection{Time dependent methods}
+    
+    In the following we give a brief review of the generalization of the Hartree-Fock, configuration-interaction and coupled-cluster methods to the time domain. A comprehensive review of time-depedent configuration interaction (TDCI) and time-dependent Hartree-Fock (TDHF) methods, including the so-called multiconfigurational time-dependent Hartree-Fock is given in the review by Hochstuhl et al.\cite{Hochstuhl2014}. For a detailed description of time-depedent coupled-cluster we refer to the works\cite{OATDCC_2012,Symplectic_TDCC_2018}.
+    
+    Common to TDHF and TDFCI is that they can be derived from an underlying time-dependent variational principle (TDVP). Following Hochstuhl et al. the Lagrange formulation of the TDVP is given by
+    \begin{equation}
+        \delta \int_{t_0}^{t_1} L(t) = 0 \label{Lagrange TDVP}
+    \end{equation}
+    and the boundary conditions $\delta L(t_0) = \delta L(t_1) = 0$.
+    Here, $\delta$ is a variation in the wavefunction.
+    The Lagrangian $L(t)$ is given by
+    \begin{equation}
+        L(t) = \bra{\Psi(t)}\hat{H}(t)-i\partial_t\ket{\Psi(t)}
+    \end{equation}
+    Thus, we seek a wavefunction such that eq. \ref{Lagrange TDVP} is stationary with respect to all variations of the wavefunction paramters. 
+     
+    \subsubsection{Time-Dependent Hartree-Fock}
+    In time-dependent Hartree-Fock the wavefunction is, as with the ground state Hartree-Fock method, assumed to be described by a single Slater determinant 
+    \begin{equation}
+        \ket{\Psi(t)} = \ket{\Phi(t)} \label{TDHF ansatz}
+    \end{equation}
+    where the single-particle functions now are assumed to be time-dependent.
+    
+    The requirement that $\delta \int_{t_0}^{t_1} = 0$ with repsect to variations of the single-particle funtions leads to the TDHF equations\cite{Hochstuhl2014}
+    \begin{equation}
+        i \frac{\partial}{\partial t} \ket{\phi_i(t)} = \hat{f}(t) \ket{\phi_i(t)},
+    \end{equation}
+    where $\hat{f}(t)$ is the Fock operator.
+    
+    \subsubsection{Time-Dependent Configuration Interaction}
+    In complete analogy with the time-independent case, the TDCI wavefunction expanded in terms of Slater determinants,
+    \begin{equation}
+        \ket{\Psi(t)} = \sum_{I=1}^{N_\text{sd}} C_I(t) \ket{\Phi_I} \label{TDCI ansatz}
+    \end{equation}
+    where the expansions coefficients now are time-dependent.
+    We assume that the Slater determinants are orthogonal
+    
+    Again, demanding that $\delta \int_{t_0}^{t_1} L(t) = 0$ with respect to variations of the expansion coefficients leads to the TDCI equations\cite{Hochstuhl2014}
+    \begin{equation}
+        i\frac{\partial}{\partial t} C(t) = H(t) C(t)
+    \end{equation}
+    where $H_{IJ}(t) = \bra{\Phi_I}\hat{H}(t) \ket{\Phi_J}$.
 
-\section{Time-dependent fields}
-    \subsection{Dipole laser field}
-        The dipole laser field we will be looking at is given by
-        \begin{align}
-            \vfield(\boldsymbol{r}_i, t)
-            &= \envelope(t) \cdot \boldsymbol{r}_i,
-        \end{align}
-        where the \emph{laser envelope} $\envelope(t)$ is given by a time-varying field, e.g., purely sinusoidal with a constant amplitude as in the article by Zanghellini et. al \cite{Zanghellini04}, and with a polarization direction $\polarization$.
-        The dipole-part of the name of the laser stems from the position vector $\vec{r}_i$.
-    \subsection{Magnetic field}
-        Figure out how to model this field.
-        
-        Hamiltonian for a single particle in a magnetic field \cite{TimeDomainTwoElectronsQuantumDot}
-\begin{equation}
-    \hat{H} = \frac{1}{2m} \left( \frac{\hbar}{i} \nabla - q \vec{A} \right)^2 + V(\vec{r})
-\end{equation}
-For a uniform magnetic field in the z-direction, we have 
-\begin{equation}
-    \vec{A} = \frac{B}{2} (-y,x,0) = B_0 (-y,x,0)
-\end{equation}
-Thus, 
-\begin{equation}
-    \hat{H} \psi(x,y) = \left(-\frac{\hbar^2}{2m} \nabla^2  - \frac{2q}{2m}\vec{A} \cdot \nabla  + \frac{q^2}{2m} A^2 + V(x,y) \right) \psi(x,y).
-\end{equation}
-Choosing atomic units ($\hbar = q = m = 1$), we have
-\begin{equation}
-    \hat{H} \psi(x,y) = \left(-\frac{1}{2} \nabla^2  -\vec{A} \cdot \nabla  + \frac{1}{2}A^2 + V(x,y) \right) \psi(x,y).
-\end{equation}
+\subsubsection{Time dependent coupled cluster}
+\mycomment{Den gamle TDCC seksjonen er flyttet til enden av dokumentet. Jeg mista oversikten og den ble unødvendig omfattende.}
+\begin{itemize}
+    \item [\todo] State time-depedent bivariational principle
+    \item [\todo] State $\tau,\lambda$-equations in time 
+    \item [\todo] Comment on generalization to time-dependent orbitals
+\end{itemize}
 
+
+\section{Systems/Quantum dots}
+    \mycomment{Motivate why we consider quantum dots}
+    \subsection{The quantum dot Hamiltonian}
+    The general Hamiltonian for interacting electrons in a (time-dependent) confining potential subject to an external electric field (e.g a laser pulse) is given by,
+    \begin{equation}
+        \begin{aligned}
+            \hat{H}(t) =& \frac{1}{2m^*} \sum_{i=1}^N (\vb{p}_i + e \vb{A}_i)^2
+                 +  \sum_{i=1}^N v_\text{conf}(\mathbf{r}_i) \\
+                 &+ \frac{1}{2}\frac{e^2}{4\pi\epsilon_r\epsilon_0} 
+                    \sum_{i \neq j} \frac{1}{\abs{\vb{r}_i - \vb{r}_j}}
+                + eE(t) \sum_{i=1}^N \vb{r}_i \cdot \hat{n}_{\text{polar}},
+        \end{aligned}
+    \end{equation}
+    where $E(t)$ is the electric field and $\hat{n}_{\text{polar}}$ a polarization vector. The parameters $m^*$ and $\epsilon_r$ denote the effective electron mass and relative permittivity respectively and are material dependent.  
+    
+    Typical parameters for the effective electron mass and relative permittivity used in the litterature are those of GaAs where $m^* = 0.067 m_e$ and $\epsilon_r = 12.4$ \mycomment{INSERT REF}.
+    
+    Using $m^*$ and $\epsilon_r$ we define appropriate length, time and energy scales which is referred to as effective atomic units. The effective bohr radius is defined by 
+    \begin{equation}
+        a_0^* = \frac{4\pi \epsilon_0 \epsilon_r \hbar^2}{m^* e^2} = \frac{\epsilon_r m_e}{m^*} a_0
+    \end{equation}
+    the effective Hartree ($E_H^*$) by
+    \begin{equation}
+        1E_H^* = \frac{m^* e^4}{(4\pi \epsilon_0 \epsilon_r)^2 \hbar^2} = \frac{m^*}{\epsilon_r^2 m_e} E_H,
+    \end{equation}
+    and the effective atomic time unit by 
+    \begin{equation}
+        t_0^* = \frac{(4\pi \epsilon_0 \epsilon_r)^2 \hbar^3}{m^* e^4} = \frac{\epsilon_r^2 m_e}{m^*} t_0.
+    \end{equation}
+    
+    In the following discussion we will consider two kinds of 
+    confining potentials, the commonly used harmonic oscillator potential and a double well potential. 
+    
+    
+    \subsection{Parabolic/Harmonic confinement}
+    If the confinement is quadratic/parabolic/harmonic
+    \begin{equation}
+        v_\text{conf}(\mathbf{r}) = \frac{1}{2}m^* \omega_0 r^2
+    \end{equation}
+    the Hamiltonian can be separated in relative and center of mass coordinates. This has important implications for the properties of the solution(s) of both the stationary and dynamic problem. 
+    
+    In particular it can be shown that a parabolic quantum well absorbs far-infrared radiation (dipole approximation is valid) at the bare harmonic-oscillator frequency independent of electron-electron interaction and the number of electrons in the well \cite{Brey_Johnson_Halerpin, Taut_QD_arrays}.
+    
+    Peeters\cite{Peeters_gen_Kohn_theorem} sums this up in what he refers to as the generalized Kohn theorem\cite{Kohn_theorem_1961}:
+    
+    \begin{displayquote}
+    The resonance frequencies in the
+    magneto-optical absorption spectrum of a quantum dot
+    with parabolic confinement
+    are independent of the
+    electron-electron interaction and are given by the single
+    electron transition frequencies.
+    \end{displayquote}
+    Note that this statement is valid also when a static magnetic field is present.
+    
+    This has the implication that electron-electron can not be seen and investigated by far infrared (FIR) spectroscopy \cite{Taut_Broken_Gen_Kohn_2001}.
+    
+    In actual fact, it has been observed experimentally that the resonance frequencies of quantum dots are independent of the number of electrons
+    \cite{Sikorski_Merkt,Sikorski_Merkt_2}.
+    
+    This serves as an important benchmark for our implementations. If we compute the spectrum (Fourier transform of dipole moment after laser pulse) we expect a single spectral line, at the harmonic oscillator frequency, independent of the number of particles. \mycomment{This gives a benchmark for $N > 2$}
+    
+    \subsection{Double well}
+    \begin{equation}
+        v(x,y) = \frac{1}{2}m^* \omega_0^2 \left(x^2+y^2 -\alpha|x|+\frac{1}{4}\alpha^2 \right)
+    \end{equation}
+    
+    \subsection{Electric field/Laser pulse}
+    \begin{itemize}
+        \item [\todo] Define sensible laser parameters, i.e. $\omega$ should correspond to far-infrared light and $\mathcal{E}_0$ should not be crazy-ass strong.
+        \item [\todo] The laser pulse model below is the most common I have seen, find a suitable reference.
+    \end{itemize}
+    \begin{equation}
+        E(t) = \mathcal{E}_0 \sin^2\left(  \frac{\pi(t-t_0)}{t_d} \right) \cos\left(\omega (t-t_0) \right)
+    \end{equation}
+    where $\mathcal{E}_0$ is the peak electric field strength, $t_d$ the pulse duration, $\omega$ is the laser/carrier frequency and $t_0$ is the start time.
 \section{Results \& Discussion}
-
+    
+    \begin{itemize}
+        \item Harmonic potential
+        \begin{itemize}
+            \item [\checkmark] Compare with Zanghellini study
+            \item [\todo] Compare single particle spectrum with $N \geq 2$. We could do $N=2,4,6$ for one spatial dimension (closed shell) and $N=2,6$ in two spatial dimensions. We expect a single spectral line at the HO-frequency independent of $N$. Possible noise due to the center of mass problem.
+            \item[\todo] With static magnetic field we can "manufacture" a shell structure that supports a $N=4$ closed shell system. The generalized Kohn theorem holds also with a static magnetic field (the same two spectral lines as in the single particle case), so in that case we could do $N=2,4,6$ in two spatial dimensions as well. Maybe this is better, since we then do not have to concern ourselves with 1d-model at all (apart from the Zanghellini benchmark).
+        \end{itemize}
+        \item Double well
+        \begin{itemize}
+            \item [\todo] Single particle spectrum
+            \item [\todo] Compute spectrum for $N=2,4,6$, can we "detect" many body effect compared with the single particle case?
+            \item[\todo] Compare TDHF and TDCCSD solutions. Expect "richer" result from TDCCSD.
+            \item [\todo] Convergence of dynamics as function of nr of basis functions? HO-functions centered at $x=y=0$ are not ideal for double well.
+        \end{itemize}
+        
+    \end{itemize}
+    
     \subsection{One-dimensional quantum dot benchmark}
         Comparison of the varying methods with the results and figures from Zanghellini et. al\cite{Zanghellini04}.
+        See \autoref{fig:1DZanghellini}.
         
         \begin{figure}
         \includegraphics[width=0.5\textwidth]{./figures/zanghellini_fig2.eps}
         \caption{\label{fig:1DZanghellini} Probability of being in the ground state
-        $|\langle\Psi(x,0\ket{\Psi(x,t)}|^2$ for one-dimensional quantum dot with frequency
-        $\omega = 8\Omega$ and two electrons. This plot is an exact match with figure 2 in Zanghellini
+        $|\langle\Psi(x,0\ket{\Psi(x,t)}|^2$ for one-dimensional quantum dot with laser frequency
+        $\omega = 8\Omega$, where $\Omega$ is the harmonic oscillator frequency. In this system there are $2$ particles and
+        20 basis sets / orbitals have been used. This plot is an exact match with figure 2 in Zanghellini
         et al.\cite{Zanghellini04}
         }
         \end{figure}
 
     \subsection{Two-dimensional quantum dot calculations}
         Results from different interesting time-dependent observable quantities for distinct confining potentials and time-dependent fields (maybe too ambitious on different fields).
+        
+        How many oscillator shells/HO-basis functions are needed for converged dynamics for $N=2$ and $N=6$? Start with TDHF. 
+        
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.5\textwidth]{./figures/2Domega05.eps}
+            \caption{Probability of being in the ground state for two-dimensional
+            quantum dots for two and six particles. 
+            Potential frequency $\omega=0.5$, laser frequency is $8\omega = 4$}
+            \label{fig:2Doemga05}
+        \end{figure}
+        
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.5\textwidth]{./figures/2Domega10.eps}
+            \caption{Probability of being in the ground state for two-dimensional
+            quantum dots for two and six particles. 
+            Potential frequency $\omega=1.0$, laser frequency is $8\omega = 8$}
+            \label{fig:2Doemga10}
+        \end{figure}
+        
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.5\textwidth]{./figures/hf_vs_cc_n2.eps}
+            \caption{Time-dependent HF compared with time-dependent CC.
+                2D Quantum Dot, L=30, N=2, $\omega$=1.0.
+            }
+            \label{fig:hf_vs_cc_n2.eps}
+        \end{figure}
+        
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.5\textwidth]{./figures/hf_vs_cc_n6.eps}
+            \caption{Time-dependent HF compared with time-dependent CC.
+                2D Quantum Dot, L=30, N=6, $\omega$=0.5.
+            }
+            \label{fig:hf_vs_cc_n6}
+        \end{figure}
+        
+        \begin{figure}
+            \centering
+            \includegraphics[width=0.5\textwidth]{./figures/cc_convergence.eps}
+            \caption{2D quantum dot with six particles for different number of
+            orbitals.}
+            \label{fig:my_label}
+        \end{figure}
 
 \section{Concluding remarks}
 \begin{appendices}
@@ -533,7 +580,7 @@ where we have defined
     H_\mathbf{r} &\equiv -\frac{1}{2} \nabla_\mathbf{r}^2   + \frac{1}{2} \Omega_\mathbf{r}^2 \mathbf{r}^2 + \frac{1}{2}v_{\text{int}}(\mathbf{r}) \\
     H_\mathbf{R} &\equiv -\frac{1}{2}\nabla_\mathbf{R}^2 + \frac{1}{2}\Omega_\mathbf{R}^2 \mathbf{R}^2
 \end{align}
-Since $H$ is independent of spin, the total wave function can be factorized as follows\cite{Taut93} 
+Since $H$ is independent of spin, the total wave function can be factorianged as follows\cite{Taut93} 
 \begin{equation}
     \psi(\mathbf{r},\mathbf{R},\mathbf{s}) = \varphi(\mathbf{r}) \xi(\mathbf{R}) \chi(s_1,s_2).
 \end{equation}
@@ -772,8 +819,262 @@ In particular, we find that the expectation value of the time-dependent Hamilton
 The harmonic potential theorem: See Dobson\cite{HarmonicPotentialTheorem} and section 6.3.2 in the book by Ullrich\cite{TD_DFT_Ullrich_Book}.
 
 
+% Note: This is an example of how to plot raw data files.
+% \begin{figure}
+%     \centering
+%     \begin{tikzpicture}
+%         \begin{axis}
+%             \addplot+[
+%                 scatter,
+%                 only marks,
+%             ]
+%             table {dat/foo.dat};
+%         \end{axis}
+%     \end{tikzpicture}
+%     \caption{Something new and fancy.}
+%     \label{fig:my_label_test}
+% \end{figure}
+
 \end{appendices}
 \newpage
 \bibliographystyle{ieeetr}
 \bibliography{refs}
 \end{document}
+
+Old Text
+\begin{comment}
+    Relevant articles:
+    \begin{itemize}
+        \item Simple spin-dependent field TDHF study:\cite{TDHF_Singlet_Triplet}
+        \item One dimensional time-dependent quantum dot: \cite{Zanghellini04}
+        \item Harmonic single well: \cite{HjorthJensenQD_2017}
+        \item Theoretical study double well: \cite{Double_Well_2000}
+        \item Experiment with two fermions in double well: \cite{Fermions_Double_Well_Experiment}
+        \item Coupled double well: \cite{Coupled_double_wells}
+        \item Time domain two electrons in quantum dot: \cite{TimeDomainTwoElectronsQuantumDot}
+        \item Time-dependency with spin-orbit coupling: \cite{Spin_orbit_coupling}
+        \item Time-domain simulation of quantum spin: \cite{Time_domain_quantum_spin}
+        \item Entanglement in spin-qubit quantum dots: \cite{Entanglement_spin_qubit_quantum_dots}
+    \end{itemize}
+\end{comment}
+
+\begin{comment}
+\section{Time-dependent fields}
+    \subsection{Dipole laser field}
+        The dipole laser field we will be looking at is given by
+        \begin{align}
+            \vfield(\boldsymbol{r}_i, t)
+            &= \envelope(t) \cdot \boldsymbol{r}_i,
+        \end{align}
+        where the \emph{laser envelope} $\envelope(t)$ is given by a time-varying field, e.g., purely sinusoidal with a constant amplitude as in the article by Zanghellini et. al \cite{Zanghellini04}, and with a polarization direction $\polarization$.
+        The dipole-part of the name of the laser stems from the position vector $\vec{r}_i$.
+    \subsection{Magnetic field}
+        Figure out how to model this field.
+        
+        Hamiltonian for a single particle in a magnetic field \cite{TimeDomainTwoElectronsQuantumDot}
+\begin{equation}
+    \hat{H} = \frac{1}{2m} \left( \frac{\hbar}{i} \nabla - q \vec{A} \right)^2 + V(\vec{r})
+\end{equation}
+For a uniform magnetic field in the z-direction, we have 
+\begin{equation}
+    \vec{A} = \frac{B}{2} (-y,x,0) = B_0 (-y,x,0)
+\end{equation}
+Thus, 
+\begin{equation}
+    \hat{H} \psi(x,y) = \left(-\frac{\hbar^2}{2m} \nabla^2  - \frac{2q}{2m}\vec{A} \cdot \nabla  + \frac{q^2}{2m} A^2 + V(x,y) \right) \psi(x,y).
+\end{equation}
+Choosing atomic units ($\hbar = q = m = 1$), we have
+\begin{equation}
+    \hat{H} \psi(x,y) = \left(-\frac{1}{2} \nabla^2  -\vec{A} \cdot \nabla  + \frac{1}{2}A^2 + V(x,y) \right) \psi(x,y).
+\end{equation}
+\end{comment}
+
+\subsection{One dimensional quantum dot}
+        We will use the one-dimensional quantum dot model considered by Zanghellini et. al in \cite{Zanghellini04}, as a benchmark/validation for our implementations.
+    
+    \subsection{Two dimensional quantum dot}
+        For a two dimensional quantum dot model we will consider different confining potential. There already exists studies concerning the ground state properties the electrons are confined by the harmonic oscillator potential, see for example \cite{HjorthJensenQD_2017}. We will use this as a starting point for time-dependent studies.
+    \subsubsection{Single well}
+        The Hamiltonian of the two-dimensional harmonic oscillator quantum dot is given by \autoref{eq:general_hamiltonian}, with the confining potential
+        \begin{align}
+            \vconf(\boldsymbol{r}_i) \equiv \frac{1}{2} \omega^2 \boldsymbol{r}_i^2.
+        \end{align}
+    \subsubsection{Double well}
+    
+\begin{comment}
+\section{TODO}
+\begin{itemize}
+    \item How do you treat the centre of mass problem???
+    \item The harmonic potential theorem\cite{HarmonicPotentialTheorem}: this depends on basis size! One way to check this is to let $u^{pq}_{rs} = 0$ and use a small number of basis functions. The short story: the particle density (in time) is rigidly translated when the confining potential is harmonic and the applied field is the simple dipole laser we use! 
+    \item Furthermore, if I read correctly, we should observe that the (for example) the time dependent energy is effectively the same as for a single particle problem. 
+    
+    Quote from\cite{Chakraborty}: "In conclusion, the interaction of electrons in quantum
+dots leads to rich structure in their energy spectrum.
+However, FIR spectroscopy cannot probe it when the
+confining potential is quadratic because the optical excitations are then excitations of the cm and have exactly
+the same energies as single-electron excitations."
+    
+    This is (again, if I understand the implications of the harmonic potential theorem correctly) due to the fact that the Hamiltonian separates into relative and center of mass coordinates with a harmonic potential and this type of applied field. This effect is independent of the number of particles. If we can actually demonstrate this, it is very solid foundation for claiming the correctness of the implementation. This also says something about the quality of the basis set. 
+    \item Basically, what I am trying to say is that the "shape" of computed values (energy, overlap, expectation value of dipole, etc) is independent of the number of particles and will look like the corresponding values of the single particle problem apart from a scaling due to the number of particles. 
+    \item Thus, it is maybe sensible to include comparisons with the single particle problem (which can be solved analytically or on a grid with f. ex RK4).
+\end{itemize}
+\end{comment}
+
+\section{Some ideas}
+List of ideas which is written down so that I dont forget it. Not everything here is intended for this work. 
+\begin{itemize}
+    \item Single particle problem, harmonic well: In dipole approx, state $n$ only couples with state $n-1$ and $n+1$ and one only get on spectral 
+    line (Fourier transform of time dep dipole moment after laser pulse), since $\Delta E_{n (n\pm1)} = |E_{n\pm1}-E_{n}| = \omega$. Is this also true when we have more than one particle? Can use FCI to check get excited states for $N=2$ to investigate this.
+    \item How does dynamic behavior (harmonic potential) depend on: a) The number of particles, b) The spatial dimension, i.e. 1d or 2d-dot?
+    \item TDHF vs TDCC vs TDFCI (and truncated TDCI models)
+    \item "Convergence" of dynamics as a function of the nr of basis functions. This is work in progress (Sebastian). 
+    \item Calibrate model parameters to experiments.
+    \item How does dynamic behavior depend on choice of potential compared with harmonic well? 
+    \begin{itemize}
+        \item [a)] Double dot potentials: This is already work in progress.
+        \item [b)] Gaussian potential (finite well). Do 1d case first for simplicity.
+        \item [c)] Repeat questions above regarding harmonic potential, how does dynamics depend on nr of particles and spatial dimension.
+    \end{itemize}
+    \item In what way is dynamics influenced by inclusion of a static magnetic field? This is already work in progress (Sebastian).
+    \item Spin dependent fields: If we start in, say, a singlet state ($S=0$) and the Hamiltonian is spin-independent, we can never make a transition to a state with a different spin symmetry. Simple dummy case is to make the "laser" act on only up or down spin, inducing transitions to other spin states. I have tried this on atomic/molecular systems (Håkon), and it works in the sense that I get transitions to other spin states.
+    \item Specific for double dot (possible Master thesis maybe). Develop a better basis set for double dots, not using just plain HO's. If we think of the bottom of the wells as "nuclei" we can do the quantum chemistry approach by placing basis functions on  each center, and maybe use plain HO for higher states (above double dot barrier). This requires overlap integrals. One idea is to fetch gaussian integrals from libint. Can be done on one-dimensional systems first.
+\end{itemize}
+
+\subsection{Coupled Cluster Theory}
+    
+    Full Configuration Interaction (FCI) will provide you with an exact solution, but since the FCI space grows Pascal-triangularly (Question: Is the growth exponential when the growth does not follow an exponential function?) and because we are constrained by limited amount of computing power, FCI is not practically feasible. The Hartree-Fock method, on the other hand, approximates systems by ignoring electron-electron interaction and can therefore be quite inaccurate. Coupled Cluster to the rescue! Hurray. Coupled cluster cleverly include higher-order excitations and takes electron correlation effects into account. Time-developed coupled cluster (TDCC) can be tricky, however. 
+    
+    \subsubsection{Ground State coupled cluster}
+    In coupled cluster theory we employ an exponential ansatz for the $N$-particle correlated wavefunction 
+    \begin{equation}
+       \ket{\Psi_{\text{CC}}} = e^{\hat{T}}\ket{\Phi} 
+    \end{equation}
+    where $\ket{\Phi}$ is a reference state, typically the HF-state. The cluster operator $\hat{T} = \sum_{k=1}^N \hat{T}_k$ is a sum of $k$-particle $k$-hole excitation operators, $\hat{T}_k$, 
+    \begin{equation}
+        \hat{T}_k = \left(\frac{1}{k!}\right)^2 \sum_{abc\cdots ijk\cdots} \tau^{abc\cdots}_{ijk\cdots}   \ccr{a}  \can{i} \ccr{b} \can{j}  \ccr{c} \can{k} \cdots 
+    \end{equation}
+    where the unknowns $\tau^{abc\cdots}_{ijk\cdots}$ are referred to as cluster amplitudes. The operators $\hat{T}_1, \hat{T}_2, \hat{T}_3, \cdots$ and corresponding amplitudes $\tau^a_i, \tau^{ab}_{ij}, \tau^{abc}_{ijk},\cdots$ are referred to as singly, doubly, triply-, etc excited operators and amplitudes respectively.
+    
+    Insertion of the exponential ansatz into the time independent Schrödinger equation results in 
+    \begin{equation}
+        \hat{H}e^{\hat{T}} \ket{\Phi} = E e^{\hat{T}} \ket{\Phi}.
+    \end{equation}
+    Multiplying with $e^{-T}$ we have that 
+    \begin{equation}
+        \bar{H}_{CC} \ket{\Phi} = E \ket{\Phi} \label{SimTransSE},
+    \end{equation}
+    where we have defined the similarity transformed Hamiltonian 
+    \begin{equation}
+        \bar{H}_{CC} \equiv e^{-\hat{T}}\hat{H}e^{\hat{T}}.
+    \end{equation}
+    
+    Projecting equation (\ref{SimTransSE}) with the reference or any excited determinant gives 
+    \begin{align}
+        E_{CC} &= \braket{\Phi|\bar{H}_{cc}|\Phi} \label{CCenergy} \\
+        0 &= \braket{\Phi^\mu|\bar{H}_{cc}|\Phi} \label{AmplitudeEqsCC},
+    \end{align}
+    where $\mu$ denotes a generic excitation. Eq. (\ref{CCenergy}) is the coupled cluster energy, while eq. (\ref{AmplitudeEqsCC}) defines a set of nonlinear equations for the unknowns cluster amplitudes. In the limit where $\hat{T}$ is not truncated eqs. (\ref{CCenergy}) and (\ref{AmplitudeEqsCC}) is equivalent to the full configuration-interaction method\cite{VarCC_2013}.
+    
+    (BCH-expansion of $\bar{H}$)!
+    
+    It is important to note that since $\hat{T} \neq \hat{T}^\dagger$, the CC-energy is non-variational, i.e 
+    \begin{equation}
+        E_{CC} = \braket{\Phi|e^{-T}\hat{H}e^{T}|\Phi} \neq \braket{\Phi|e^{T^\dagger}\hat{H}e^{T}|\Phi} 
+    \end{equation}
+    and is not guaranteed to give an upper bound on the energy when $\hat{T}$ is truncated. Working directly with the expression $e^{T^\dagger}\hat{H}e^{T}$ is impractical since it does not truncate after four nested commutators as opposed to $\bar{H}$.
+    
+    Since CC is non-variational the question of how to compute expectation values other than the energy arises. The usual definiton of the expectation value of an operator, A, is given by 
+    \begin{equation}
+        \braket{A} = \braket{\Psi|\hat{A}|\Psi}.
+    \end{equation}
+    However, we have seen that $\ket{\Psi}^\dagger \neq \bra{\Phi}e^{-\hat{T}}$ such that $E_{CC} \neq \braket{H}$.
+    
+    The solution to this problem was introduced independently by workers in quantum chemistry and in theoretical physics\cite{VarCC_2013}.
+    
+    The idea is to introduce independent paramterizations of the ket- and bra state, $\bra{\tilde{\Psi}} \neq \ket{\Psi}^\dagger$. [Work in progress...]
+    
+    
+    \subsubsection{The time dependent bivariational principle}
+    (ASSUMING THE PREVIOUS SECTION IN PLACE)! 
+    
+    The extension of CC-theory to the time domain can be done through a generalization of the time dependent variational principle\cite{BECK2001}, to a corresponding time dependent bivariational principle\cite{OATDCC_2012}.
+    
+    Consider the action-like functional 
+    \begin{align}
+    \mathcal{S}[\bra{\tilde{\Psi}}, \ket{\Psi}] &= \int_0^T \braket{\tilde{\Psi}(t)|i\frac{d}{dt}-\hat{H}(t)|\Psi(t)} dt  \nonumber \\ 
+    &= \int_0^T \braket{\tilde{\Phi}(t)|(\mathbb{1}+\hat{\Lambda}(t))e^{-\hat{T}(t)}\left(i\frac{d}{dt}-\hat{H}(t)\right) e^{\hat{T}(t)}|\Phi(t)} dt \nonumber 
+    \end{align}
+    where the Hamiltonian generally is time dependent. The integrand can be written more compactly as 
+    \begin{align}
+        &\braket{\tilde{\Phi}(t)|(\mathbb{1}+\hat{\Lambda}(t))e^{-\hat{T}(t)}\left(i\frac{d}{dt}-\hat{H}(t)\right) e^{\hat{T}(t)}|\Phi(t)} \nonumber \\ 
+        = \ \ & i \lambda_\mu \dot{\tau}^\mu + \rho^q_p \left( h^p_q - i \eta^p_q \right) + \frac{1}{4}u^{pr}_{qs}\rho^{qs}_{pr}  \\
+        =\ \ & i \lambda_\mu \dot{\tau}^\mu - \mathcal{E}_{\hat{H}-iD_0}[\lambda, \tau] 
+    \end{align}
+    where we have defined 
+    \begin{align}
+        D_0 &= \braket{\tilde{\varphi}_p|\dot{\varphi}_q} \ccr{p} \tilde{c}_q \\
+        \eta^p_q &= \braket{\tilde{\varphi}_p|\dot{\varphi}_q}.
+    \end{align}
+    
+    Thus, 
+    \begin{align}
+        \mathcal{S}[\bra{\tilde{\Psi}}, \ket{\Psi}] &= \int_0^T i \lambda_\mu \dot{\tau}^\mu + \rho^q_p \left( h^p_q - i \eta^p_q \right) + \frac{1}{4}u^{pr}_{qs}\rho^{qs}_{pr} dt \\
+        &= \int_0^T i \lambda_\mu \dot{\tau}^\mu - \mathcal{E}_{\hat{H}-iD_0}[\lambda, \tau] dt
+    \end{align}
+    
+    The time dependent bivariational principle states that equations of motion are obtained by demanding that $\mathcal{S}$ is stationary ($\delta S = 0$) with respect to all independent variations of the parameters. Genraly both amplitudes and single-particle function/orbitals can be varied. 
+    \subsubsection{Time dependent amplitude equations}
+    The equations of motions for the amplitudes read 
+    \begin{align}
+    i \dot{\tau}^\mu &= \frac{\partial}{\partial \lambda_\mu} \mathcal{E}_{\hat{H}-iD_0}[\lambda, \tau] \nonumber \\ 
+    &=  \braket{\tilde{\Phi}_\mu|e^{-\hat{T}}(\hat{H}-iD_0)e^{\hat{T}}|\Phi} \label{OATDCC_tau_equations} \\
+-i \dot{\lambda}_\mu &= \frac{\partial}{\partial \tau^\mu} \mathcal{E}_{\hat{H}-iD_0}[\lambda, \tau] \nonumber \\ 
+&=  \braket{\tilde{\Phi}|(1+\Lambda)e^{-\hat{T}}[\hat{H}-iD_0,X_\mu]e^{\hat{T}}|\Phi} \label{OATDCC_lambda_equations}
+\end{align}
+
+The right-hand sides of equations [\ref{OATDCC_tau_equations}, \ref{OATDCC_lambda_equations}] are the same amplitude equations as in time independent cc-theory, plus an extra term due to the time dependence of the orbitals. 
+
+If the orbitals are chosen to be stationary\cite{Symplectic_TDCC_2018}, we have $D_0 = 0$ and the time dependence is determined by the amplitudes. This implies a static reference such as the Hartree-Fock determinant. In that case, we also have that $\bra{\tilde{\Phi}} = \bra{\Phi} $, i.e an orthonormal basis.
+
+\subsubsection{Time dependent orbital equations}
+Computing the variations of $\mathcal{S}$ with respect to the orbitals, we obtain equations of motion for the time-dependent orbitals. The time derivatives of the orbitals can, in general, be split into a P-space and a Q-space, 
+\begin{align}
+    \ket{\dot{\varphi}_q} &= (P+Q)\ket{\dot{\varphi}_q} = \sum_p \eta^p_q \ket{\varphi_p} + Q\ket{\dot{\varphi}_q} \\
+    \bra{\dot{\tilde{\varphi}}_q} &= \bra{\dot{\tilde{\varphi}}_q}(P+Q) = -\sum_q \eta^p_q \bra{\tilde{\varphi}_q} + \bra{\dot{\tilde{\varphi}}_p}Q
+\end{align}
+where we have defined 
+\begin{align}
+    P &= \sum_{p=1}^M \ket{\varphi_p}\bra{\tilde{\varphi}_p},  \ \ M \leq N_b \\
+    Q &= \mathbb{1}-P
+\end{align}
+with $N_b$ denoting the number of single-particle functions. 
+
+This splitting is identical to what is done in MCTDHF-theory \cite{Hochstuhl2014}, where a trunctation of the $P$-space is used to reduce the number of Slater determinants the expansion of the CI-wavefunction. 
+
+In coupled cluster methods the number of Slater determinants is reduced through the truncation of the cluster operators. Thus, we can choose to have $M=N_b$, resulting in $Q=0$. In the following we restrict our attention to the case where $Q=0$.
+
+Note that for the MCTDHF method this would be the same as FCI with time dependent orbitals and nothing is gained in terms of reducing computational complexity.  
+
+With $Q=0$ the equations of motion for the orbitals is given by
+\begin{align}
+    \ket{\dot{\varphi}_q} &=  \sum_p \eta^p_q \ket{\varphi_p} \label{Reduced ket-orbital equation} \\
+    \bra{\dot{\tilde{\varphi}}_q} &=  -\sum_q \eta^p_q \bra{\tilde{\varphi}_q} \label{Reduced bra-orbital equation}. 
+\end{align}
+The non-zero components of $\eta^p_q$ are given by the solutions of the linear equations
+\begin{align}
+    i \sum_{bj} A^{ib}_{aj} \eta^j_b &= \sum_j \rho^i_j h^j_a - \sum_b \rho^b_a h^i_b \nonumber \\
+ + &\frac{1}{2} \left[\sum_{prs} \rho^{is}_{pr} u^{pr}_{as} - \sum_{rqs} \rho^{qs}_{ar} u^{ir}_{qs}  \right] \\
+    -i \sum_{bj} A^{ja}_{bi} \eta^b_j &= \sum_b \rho^a_b h^b_i - \sum_j \rho^j_i h^a_j \nonumber \\
+ + &\frac{1}{2} \left[ \sum_{prs} \rho^{as}_{pr} u^{pr}_{is} - \sum_{rqs} \rho^{qs}_{ir} u^{ar}_{qs} \right] \nonumber \\ 
+ + &i \dot{\rho}_i^a \label{P-space bra equation}
+\end{align}
+where
+\begin{align}
+    A^{ib}_{aj} &= \braket{\tilde{\Psi}|[\ccr{j} \can{b},\ccr{a} \can{i}]|\Psi} \nonumber \\
+    &= \delta^b_a \rho^i_j - \delta^i_j \rho^b_a \nonumber  \\ 
+    &= -A^{bi}_{ja}.
+\end{align}
+
+The simplest OATDCC case is the OATDCCD approximation where the cluster operators include double excitations only. One can show that the singles amplitudes are formally redundant \cite{OATDCC_2012}, leaving the one-body density matrix block diagonal, with only $\rho^i_j$ and $\rho^a_b$ being non-zero. Thus, the last term in eq. (\ref{P-space bra equation}) is zero. 
+
+Furthermore, there is no contributions to the amplitude equations (\ref{OATDCC_tau_equations}) and (\ref{OATDCC_lambda_equations}) from $D_0$ in the doubles-only approximation. This follows from that only $\eta^a_i$ and $\eta^i_a$ are non-zero.
