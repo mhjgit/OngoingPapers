@@ -1,0 +1,227 @@
+
+\documentclass[12pt]{article}
+\usepackage{geometry} % see geometry.pdf on how to lay out the page. There's lots.
+\geometry{a4paper} % or letter or a5paper or ... etc
+% \geometry{landscape} % rotated page geometry
+
+% See the ``Article customise'' template for come common customisations
+
+\title{Notes on formulating CC and IMSRG with auxiliary field path integrals}
+\author{S.~K.~Bogner}
+%\date{} % delete this line to display the current date
+
+%%% BEGIN DOCUMENT
+\begin{document}
+
+\maketitle
+%\tableofcontents
+\section{Motivation}
+Why bother?
+\begin{itemize}
+\item It might be fruitful to connect IMSRG/CC to functional RG approaches (e.g., can we view the SRG flow as a continuous sequence of field redefinitions in the path integral?)
+\item Auxiliary fields might provide a path to extend CC/IMSRG to contain collective bosonic + fermionic DOF to handle single-particle and collective excitations on the same footing.
+\item Can higher-body analogs of the Hubbard-Stratonovich transformation provide an effective way to deal with higher truncation levels in CC/IMSRG? I feel like the HS idea is reminiscent of tensor factorization, or the use of intermediates in CC-- integrating over the auxiliary field is effectively sewing the intermediates together to reconstruct the quartic (or higher) interactions. 
+\item Can the arsenal of functional methods (e.g., stationary phase + loop corrections) in conjunction with the higher-body HS transformations be used to motivate/derive approximate triples, quadruples, etc.?
+\item If we reformulate CC/IMSRG as a functional integral over auxiliary fields, maybe we can use stochastic methods to tractably evaluate higher truncation levels. 
+\end{itemize}  
+
+
+\section{Auxiliary Field  Formulation for CCD }
+Things are a bit simpler with CC theory, so let's start with the simplest non-trivial truncation level, CCD. Everything starts from the Hubbard-Stratonovich transformation, which is basically just a simple identity for shifted multidimensional gaussian integrals. 
+
+\begin{equation}
+\label{eq:HS}
+e^{-\frac{1}{4}\rho_n A_{nm}\rho_m} = \mathcal{N}\int \prod\bigl(d\sigma_n\bigr) e^{-\sigma_n A^{-1}_{nm}\sigma_m} e^{\sigma_n\rho_n}\,
+\end{equation}
+where the Einstein summation convention is implied and the normalization factor is given by 
+
+\begin{equation}
+\mathcal{N}^{-1} = \int \prod\bigl(d\sigma_n\bigr) e^{-\sigma_n A^{-1}_{nm}\sigma_m}  = \sqrt{\frac{\pi^{N}}{\det{A} }}\,.
+\end{equation}
+Note that the above assumes a symmetric $N\times N$ matrix $A_{nm}=A_{mn}$ with positive-definite eigenvalues. [If the latter is violated, can we just add a large constant diagonal shift and subtract it away at the end?] 
+
+Now let's apply this to the simplest coupled cluster truncation level, CCD, where we have
+\begin{equation}
+\label{eq:CCD}
+He^{T_2}|\phi\rangle = Ee^{T_2}|\phi\rangle\,,
+\end{equation}
+with the CCD correlated ground state is given by $|\psi_{CCD}\rangle = e^{T_2}|\phi\rangle$ and
+\begin{equation}
+T_2 = \frac{1}{4}\sum_{abij}t^{ab}_{ij}a^{\dagger}_aa_ia^{\dagger}_ba_j\equiv \frac{1}{4}\sum_{abij}t^{ab}_{ij}\hat{\rho}_{ai}\hat{\rho}_{bj}\,.
+\end{equation}
+Labeling pairs of particle-hole indices by a single index ($\alpha\equiv(ai)$, etc.) and suppressing indices whenever it's unambiguous, we see we can write the CCD correlated ground state using Eq.~\ref{eq:HS} as 
+\begin{equation}
+|\psi_{CCD}\rangle = e^{\frac{1}{4}\rho\cdot t\cdot\rho}|\phi\rangle=\int \mathcal{D}\sigma \,e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma} e^{\sigma\cdot\rho}|\phi\rangle = \int \mathcal{D}\sigma \,e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma}\,|\phi\{\sigma\}\rangle\,, 
+\end{equation}
+where I've used the Thouless theorem in the last step and defined the integration measure $\mathcal{D}\sigma \equiv \mathcal{N}\prod\bigl(d\sigma_n\bigr)$. 
+
+It's amusing that this way of writing the CCD wave function resembles the variational ansatz for the ground state wave function in the generator coordinate method (GCM). One easily sees with a couple lines of algebra that Eq.~\ref{eq:CCD} can likewise be cast as a generalized eigenvalue equation a-la the Hill-Wheeler equation
+\begin{equation}
+\int \mathcal{D}\sigma\, \mathcal{H}(\sigma',\sigma)f(\sigma) = E \int\mathcal{D}\sigma \mathcal{N}(\sigma',\sigma)f(\sigma)\,,
+\end{equation}
+where the norm-kernel $\mathcal{N}(\sigma',\sigma) \equiv \langle\phi\{\sigma'\}|\phi\{\sigma\}\rangle$, and the GCM ``wave function'' has the particular form $f(\sigma)\equiv e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma}$.  This obviously isn't a practical way to solve the CCD equations-- if there are $n_pn_h$ different auxilliary fields $\sigma_{ai}$ (temporarily restoring explicit indices) and each is discretized with $N$ points, one gets a $N^{n_pn_h}$ dimensional generalized eigenvalue equation-- ouch. Nevertheless, it would be interesting if this connection can be exploited, perhaps in the reverse direction (i.e., mapping GCM calculations to a cheaper CCD-like formulation). 
+
+\subsection{Deriving the CCD energy and amplitude equations}
+As a first check, let's try to derive the working CCD equations in the auxiliary field formulation. 
+
+\subsubsection{Energy equation}
+Let's follow convention and start with the similarity-transformed CCD Hamiltonian.  The energy equation is
+\begin{equation}
+E_{CCD} = \langle\phi |e^{-T_2}He^{T_2}|\phi\rangle = \int \mathcal{D}\sigma'\int \mathcal{D}\sigma e^{-\sigma'\cdot t^{\!-1}\!\cdot\sigma'}\,e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma}\langle\phi|e^{i\sigma'\cdot\rho}He^{\sigma\cdot\rho}|\phi\rangle\,.
+\end{equation}
+The ``$i$'' in the exponent is not a mistake-- it arises from when I use the HS transformation to write the inverse $e^{-T_2}$ transformation as
+\begin{equation}
+e^{-\frac{1}{4}\rho\cdot t \cdot \rho}=\int \mathcal{D}\sigma' e^{-\sigma'\cdot t^{\!-1}\!\cdot\sigma'}\,e^{i\sigma'\cdot\rho}\,.
+\end{equation}
+Using the Thouless theorem, $\langle\phi|e^{i\sigma'\cdot\rho}=\langle\phi|$, and that the integrals are normalized as $\int\mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma} = 1$ gives
+\begin{equation}
+E_{CCD} = \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma}\langle\phi|H|\phi\{\sigma\}\rangle = E_{ref} + \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma}\frac{\sigma_{ai}\sigma_{bj}}{2!}\langle\phi|H|\phi^{ab}_{ij}\rangle\,.
+\end{equation}
+In the last step I used that only even powers in $\sigma$ of the matrix element $\langle\phi|H|\phi\{\sigma\}\rangle$ contribute due to the gaussian weight.  Also, assuming $H$ has at most 2-body interactions, terms in the matrix element beyond quadratic order in $\sigma$ vanish.  Here and below, we'll make frequent use of
+\begin{equation}
+\langle \sigma_{ai}\sigma_{bj}\rangle \equiv \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma}\sigma_{ai}\sigma_{bj} = \frac{1}{2}t^{ab}_{ij}\,,
+\end{equation}
+and Wick's theorem to compute gaussian averages of higher products of $\sigma$'s, e.g., 
+\begin{equation}
+\langle\sigma_{ai}\sigma_{bj}\sigma_{ck}\sigma_{dl}\rangle = \frac{1}{4}\bigl(t^{ab}_{ij}t^{cd}_{kl}+ t^{ad}_{il}t^{bc}_{jk} + t^{ac}_{ik}t^{bd}_{jl}\bigr)\,.
+\end{equation}
+Pulling it all together, we get the usual expression for the CCD energy:
+
+\begin{equation}
+E_{CCD} = E_{ref} + \frac{1}{4}t^{ab}_{ij}\langle ij||ab\rangle\,.
+\end{equation}
+
+\subsubsection{Amplitude equations}
+The derivation of the CCD amplitude equation proceeds analogously, though with a few more steps. We start with
+\begin{equation}
+0 = \langle\phi^{ab}_{ij}|e^{-T_2}He^{T_2}|\phi\rangle = \int \mathcal{D}\sigma'\int\mathcal{D}\sigma e^{-\sigma'\cdot t^{\!-1}\!\cdot\sigma'} e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma} \mathcal{M}^{ab}_{ij}(\sigma',\sigma)\,,
+\end{equation}
+where we've defined 
+\begin{equation}
+ \mathcal{M}^{ab}_{ij}(\sigma',\sigma)\equiv\langle\phi^{ab}_{ij}|e^{i\sigma'\cdot\rho}He^{\sigma\cdot\rho}|\phi\rangle\,.
+\end{equation}
+The general strategy then is to expand $\mathcal{M}^{ab}_{ij}(\sigma',\sigma)$ in powers of $\sigma',\sigma$, and make use of Wick's theorem with respect to the gaussian auxiliary field integrations. There's some flexibility in how you actually evaluate this. The way I proceed is to start by defining transformed creation/annihilation operators (note that the $a^{\dagger}_a$ and $a_i$ don't change under this transformation),
+\begin{eqnarray}
+\bar{a}^{\dagger}_i &=& e^{-i\sigma'\cdot\rho}a^{\dagger}_i e^{i\sigma'\cdot\rho} = a^{\dagger}_i - i \sigma'_{ai}a^{\dagger}_a \\
+\bar{a}_a &=&  e^{-i\sigma'\cdot\rho}a_a e^{i\sigma'\cdot\rho}  = a_a + i\sigma'_{ai}a_i\,.
+\end{eqnarray}
+Then I invoke the Thouless theorem to give 
+\begin{equation}
+\mathcal{M}^{ab}_{ij}(\sigma',\sigma) = \langle\phi|\bar{a}^{\dagger}_i\bar{a}_a\bar{a}^{\dagger}_j\bar{a}_b H|\phi\{\sigma\}\rangle\,.
+\end{equation}
+This might seem like a mess of terms, but keep in mind that $\langle\phi|a^{\dagger}_a = 0 = \langle\phi|a_i $ and that terms with odd powers of $\sigma'$ integrate to zero. Things therefore simplify considerably to 
+\begin{eqnarray}
+\langle\phi|\bar{a}^{\dagger}_i\bar{a}_a\bar{a}^{\dagger}_j\bar{a}_b &=& \langle\phi|a^{\dagger}_i\bigl(a_a+i\sigma'_{ai'}a_{i'}\bigr)\bigl(a^{\dagger}_j - i\sigma'_{a'j}a^{\dagger}_{a'}\bigr)\bigl(a_b + i\sigma'_{bj'}a_{j'}\bigr)\\
+&=& \langle\phi|\bigl(a^{\dagger}_ia_a + i\sigma'_{ai}\bigr)\bigl(a^{\dagger}_j - i\sigma'_{a'j}a^{\dagger}_{a'}\bigr)\bigl(a_b + i\sigma'_{bj'}a_{j'}\bigr)\\
+&=& \langle\phi|\bigl(a^{\dagger}_ia_a + i\sigma'_{ai}\bigr)\bigl(a^{\dagger}_ja_b -i\sigma'_{a'j}a^{\dagger}_{a'}a_b + i \sigma'_{bj'}a^{\dagger}_ja_j' + \sigma'_{a'j}\sigma'_{bj'}a^{\dagger}_{a'}a_{j'}\bigr)\nonumber\\
+&=&  \langle\phi|\bigl(a^{\dagger}_ia_aa^{\dagger}_ja_b + \sigma'_{a'j}\sigma'_{bj'}a^{\dagger}_ia_aa^{\dagger}_{a'}a_{j'} -\sigma'_{ai}\sigma'_{bj'}a^{\dagger}_{j}a_{j'}\bigr)\\
+&=& \langle\phi|\bigl(a^{\dagger}_ia_aa^{\dagger}_ja_b +\sigma'_{aj}\sigma'_{bi}-\sigma'_{ai}\sigma'_{bj}\bigr)\,,
+\end{eqnarray}
+where I used Wick's theorem for the Fermionic operators in the last step. Therefore, the $\mathcal{M}(\sigma',\sigma)$ is given by
+\begin{equation}
+\mathcal{M}^{ab}_{ij}(\sigma',\sigma)= \langle\phi^{ab}_{ij}|H|\phi\{\sigma\}\rangle +\bigl(\sigma'_{aj}\sigma'_{bi} -\sigma'_{ai}\sigma'_{bj}\bigr)\langle\phi|H|\phi\{\sigma\}\rangle\,,
+\end{equation}
+and the $\mathcal{D}\sigma'$ integral is trivially done. The amplitude equations then become
+\begin{equation}
+\label{eq:AFamp}
+0 = \langle\phi^{ab}_{ij}|e^{-T_2}He^{T_2}|\phi\rangle = \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma}\biggl\{\langle\phi^{ab}_{ij}|H|\phi\{\sigma\}\rangle  - t^{ab}_{ij}\langle\phi|H|\phi\{\sigma\}\rangle\biggr\}\,.
+\end{equation}
+We can evaluate the above matrix elements by using the elegant generalized Wick's theorem between non-orthogonal vacua of Balian et al. (see Ch. 4 of Blaizot and Ripka), or we can proceed in a brute force manner by noting that only terms in $|\phi\{\sigma\}\rangle$ that involve even powers of $\sigma$ are non-zero after the gaussian integration. Furthermore, using that $H$ can at most change the excitation level by $\pm 2$, we have
+\begin{eqnarray}
+0 &=&  \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma}\biggl\{\langle\phi^{ab}_{ij}|H|\phi\rangle + \frac{1}{2}\sigma_{a'i'}\sigma_{b'j'}\langle\phi^{ab}_{ij}|H|\phi^{a'b'}_{i'j'}\rangle+\frac{1}{24}\sigma_{a'i'}\sigma_{b'j'}\sigma_{c'k'}\sigma_{d'l'}\langle\phi^{ab}_{ij}|H|\phi^{a'b'c'd'}_{i'j'k'l'}\rangle \nonumber\\ 
+&&\qquad-t^{ab}_{ij}\langle\phi|H|\phi\rangle - \frac{1}{2}t^{ab}_{ij}\sigma_{a'i'}\sigma_{b'j'}\langle\phi|H|\phi^{a'b'}_{i'j'}\rangle\biggr\}\,.
+\end{eqnarray}
+Applying Wick's theorem for the integral over $\mathcal{D}\sigma$, one has
+\begin{eqnarray}
+0 &=& \langle\phi^{ab}_{ij}|H|\phi\rangle + \frac{1}{4}t^{a'b'}_{i'j'}\langle\phi^{ab}_{ij}|H|\phi^{a'b'}_{i'j'}\rangle +\frac{1}{96}\bigl(t^{a'b'}_{i'j'}t^{c'd'}_{k'l'} + t^{a'd'}_{i'l'}t^{b'c'}_{j'k'}+t^{a'c'}_{i'k'}t^{b'd'}_{j'l'}\bigr)\langle\phi^{ab}_{ij}|H|\phi^{a'b'c'd'}_{i'j'k'l'}\rangle\nonumber\\
+&&\qquad\qquad -t^{ab}_{ij}E_{ref} -\frac{1}{4}t^{ab}_{ij}t^{a'b'}_{i'j'}\langle\phi|H|\phi^{a'b'}_{i'j'}\rangle\\
+&=& \langle ab||ij\rangle +  \frac{1}{4}t^{a'b'}_{i'j'}\langle\phi^{ab}_{ij}|H|\phi^{a'b'}_{i'j'}\rangle +\frac{1}{96}\bigl(t^{a'b'}_{i'j'}t^{c'd'}_{k'l'} + t^{a'd'}_{i'l'}t^{b'c'}_{j'k'}+t^{a'c'}_{i'k'}t^{b'd'}_{j'l'}\bigr)\langle\phi^{ab}_{ij}|H|\phi^{a'b'c'd'}_{i'j'k'l'}\rangle\nonumber\\
+&&\qquad\qquad\qquad - t^{ab}_{ij}E_{CCD}\\
+&=&\langle ab||ij\rangle +  \frac{1}{4}t^{a'b'}_{i'j'}\langle\phi^{ab}_{ij}|H|\phi^{a'b'}_{i'j'}\rangle +\frac{1}{32}t^{a'b'}_{i'j'}t^{c'd'}_{k'l'}\langle\phi^{ab}_{ij}|H|\phi^{a'b'c'd'}_{i'j'k'l'}\rangle-t^{ab}_{ij}E_{CCD}\,,
+\end{eqnarray}
+where we used that the 3 quadratic terms in the 2nd-to-last equation are equivalent to get to the final expression. 
+
+We could grind away and evaluate the matrix elements of $H$ between the different excited Slater determinants, but that is not necessary for our purposes. We recognize the last line to be the amplitude equation one gets when one starts from the non-similarity transformed form of the CCD equation and left projects onto $\langle\phi^{ab}_{ij}|$ (see e.g., Shavitt and Bartlett sec. 9.3.1),
+\begin{equation}
+\label{eq:nonST}
+\langle\phi^{ab}_{ij}|He^{T_2}|\phi\rangle = E_{CCD}\langle\phi^{ab}_{ij}|e^{T_2}|\phi\rangle\,.
+\end{equation}
+Expanding the exponentials and only keeping the terms that make non-vanishing contributions, one gets
+\begin{eqnarray}
+\langle\phi^{ab}_{ij}|H|\phi\rangle + \frac{1}{4}t^{a'b'}_{i'j'}\langle\phi^{ab}_{ij}|H|\phi^{a'b'}_{i'j'}\rangle + \frac{1}{2\cdot 4^2}t^{a'b'}_{i'j'}t^{c'd'}_{k'l'}\langle\phi^{ab}_{ij}|H|\phi^{a'b'c'd'}_{i'j'k'l'}\rangle = E_{CCD}t^{ab}_{ij}\,,
+\end{eqnarray}
+which is clearly the same as what we get after doing our integrals over our auxiliary fields. In fact, a moment's thought reveals we did a lot of uncessary work-- starting from Eq.~\ref{eq:AFamp}, we can read the HS transformation in reverse and recognize that this is nothing else than Eq.~\ref{eq:nonST}.  
+
+In hindsight, this is sort of trivial. I started by applying a well-defined mathematical identity (the HS transformation for the exponential CCD operators), and then when I integrate over the auxilliary fields, I get back what I started from!  At the end of the day, one still has to evaluate matrix elements of H (written in terms of fermion operators) between excited Slater determinants to derive the final working amplitude equations. 
+A couple speculative notes to come back to at some point:
+\begin{itemize}
+\item Maybe the discussion of Ch. 11 of Blaizot-Ripka, where Slater determinants are written in terms of bosonic coherent states and $H$ is mapped onto boson operators, might be worth playing around with.
+\item Similarly, one might try breaking up the full $e^{T_2}=\lim_{N\rightarrow\infty}\{e^{T_2/N}\}^N$ and repeatedly inserting the resolution of the identify using Fermionic coherent states. Then one can apply the HS transformation for the quartic Grassman terms for each time slice, and finally we can ``integrate out'' the Fermionic variables a-la in Euclidean path integral formulations.
+\end{itemize}
+
+\section{Stochastic approaches}
+One of the reasons for writing the CC equations as an integral over auxiliary fields is the hope that it might suggest a Monte Carlo approach. In contrast to the usual approaches, let's not work with the similarity-transformed $\bar{H}$, but instead start with the Schr\"odinger equation projected onto the various particle-hole sectors. (Is this what's called the ``projective'' approach?) Let's start off with the simplest truncation (CCD approximation) to get a feel for things.
+\subsection{CCD}
+We can write the energy and amplitude equations as
+\begin{eqnarray}
+E_{CCD} &=& \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma} \langle\phi|H|\phi\{\sigma\}\rangle \\
+t^{ab}_{ij} &=& \frac{1}{E_{CCD}}\int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma} \langle\phi^{ab}_{ij}|H|\phi\{\sigma\}\rangle\,.
+\end{eqnarray}
+We could then try to solve these equations iteratively:
+\begin{enumerate}
+\item Take an initial guess for $t$ (e.g., the 1st-order perturbative expression). 
+\item Solve for $E_{CCD}$ and $t^{ab}_{ij}$ using Monte Carlo integration. 
+\item Iterate
+\end{enumerate}
+
+\subsection{CCSD equations}
+This proceeds analogously. We use that $[T_1,T_2]=0$, so the CCSD wave function takes the form
+\begin{equation}
+|\psi_{CCSD}\rangle = e^{T_1+T_2}|\phi\rangle = \int \mathcal{D}\sigma e^{-\sigma\cdot t_2^{\!-1}\cdot\sigma} |\phi\{\sigma + t_1\}\rangle\,.
+\end{equation}
+Then we have for the energy and amplitude equations
+\begin{eqnarray}
+E_{CCSD} &=& \langle\phi|He^{T_1+T_2}|\phi\rangle = \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\cdot\sigma}\langle\phi|H|\phi\{\sigma+t_1\}\rangle\\
+t^{a}_i E_{CCSD}&=& \langle\phi^{a}_b|He^{T_1+T_2}|\phi\rangle = \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\cdot\sigma}\langle\phi^{a}_i|H|\phi\{\sigma+t_1\}\rangle\\
+\bigl(t^{ab}_{ij}+\frac{1}{2}t^{a}_{i}t^{b}_{j}\bigr)E_{CCSD} &=& \langle\phi^{ab}_{ij}|He^{T_1+T_2}|\phi\rangle  = \int \mathcal{D}\sigma  e^{-\sigma\cdot t^{\!-1}\cdot\sigma}\langle\phi^{ab}_{ij}|H|\phi\{\sigma+t_1\}\rangle\nonumber\\
+\end{eqnarray}
+
+\begin{itemize}
+\item Guess initial $t^{ab}_{ij}$ and $t^{a}_i$.
+\item Evaluate integrals to get new $E_{CCSD}$, $t^{a}_i$, and $t^{ab}_{ij}$. 
+\item Iterate
+\end{itemize}
+
+\subsection{CCDT equations}
+Since I don't fully understand the higher-body generalizations of the HS transformation, let's try a ``mixed'' approach where we use auxiliary fields to handle the $e^{T_2}$ term, but then treat the $T_3$ term explicitly.  Starting from the Schr\"odinger equation w/a CCDT ansatz and using that $[T_2,T_3]=0$, we have for the triples amplitudes:
+\begin{eqnarray}
+\langle\phi^{abc}_{ijk}|He^{T_2+T_3}|\phi\rangle = \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma} e^{T_3}\bar{H}_{T_3}|\phi\{\sigma\}\rangle \,,
+\end{eqnarray}
+where $\bar{H}_{T_3}\equiv e^{-T_3}He^{T_3}$. Then we have for the energy equation
+\begin{equation}
+E_{CCDT} = \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma} \langle\phi|\bar{H}_{T_3}|\phi\{\sigma\}\rangle\,.
+\end{equation}
+This might be alarming since we know the form of the CC energy is always the same regardless of truncation level,
+\begin{equation}
+E_{} = E_{ref} + \frac{1}{4}t^{ab}_{ij}\langle ij||ab\rangle\,.
+\end{equation}
+But this discrepancy goes away when we realize that 
+\begin{equation}
+\langle \phi|\bar{H}_{T_3}|\phi\{\sigma\}\rangle= \langle \phi|He^{T_3}|\phi\{\sigma\}\rangle = \langle \phi|H|\phi\{\sigma\}\rangle\,,
+\end{equation}
+since $|\phi\{\sigma\}\rangle$ contains terms with $0,1,2,...$ particle-hole excitations, and therefore the $T_3$ term is irrelevant since the initial Hamiltonian can only change the excitation level by two if three-body interactions are ignored. Then this brings the expression back to the same form we had for CCD, so all is well.
+
+Now onto the amplitude equations. For the double excitations,
+
+\begin{equation}
+t^{ab}_{ij} E_{CCDT} = \int \mathcal{D}\sigma e^{-\sigma\cdot t^{\!-1}\!\cdot\sigma} \langle\phi^{ab}_{ij}|He^{T_3}|\phi\{\sigma\}\rangle
+\end{equation}
+I don't know where I'm going with this. Let's shelve it and move on to the next idea.
+
+\section{Approximations via loop expansions}
+Path integrals are nice because they suggest novel approximation schemes. One such example is the approximate evaluation of the path integral via steepest descent (Euclidean/imaginary time) or stationary phase (Minkowski/real time), leading to so-called loop expansions. As discussed in Ch. 7 of Negele and Orland, these methods are powerful because they give a way to formulate a perturbative expansion around some non-trivial "reference" mean field solution, where the latter is itself non-perturbative in the bare coupling.  
+
+
+
+ 
+\end{document}
