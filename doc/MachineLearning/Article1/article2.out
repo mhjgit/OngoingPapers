@@ -1,0 +1,15 @@
+\BOOKMARK [0][-]{section*.2}{Quantum Mechanical Many-body Problems with Machine Learning Algorithms}{}% 2
+\BOOKMARK [1][-]{section*.1}{Abstract}{section*.2}% 1
+\BOOKMARK [1][-]{section*.3}{Introduction and motivation}{section*.2}% 3
+\BOOKMARK [1][-]{section*.4}{What is Machine Learning}{section*.2}% 4
+\BOOKMARK [1][-]{section*.5}{The system: two or more electrons in a harmonic oscillator trap in two dimensions}{section*.2}% 5
+\BOOKMARK [2][-]{section*.6}{Quantum Monte Carlo Motivation}{section*.5}% 6
+\BOOKMARK [1][-]{section*.7}{Why Boltzmann machines?}{section*.2}% 7
+\BOOKMARK [2][-]{section*.8}{The network}{section*.7}% 8
+\BOOKMARK [2][-]{section*.9}{Joint distribution}{section*.7}% 9
+\BOOKMARK [2][-]{section*.12}{Cost function}{section*.7}% 10
+\BOOKMARK [2][-]{section*.13}{RBMs for the quantum many body problem}{section*.7}% 11
+\BOOKMARK [2][-]{section*.14}{Choose the right RBM}{section*.7}% 12
+\BOOKMARK [2][-]{section*.15}{Representing the wave function}{section*.7}% 13
+\BOOKMARK [2][-]{section*.16}{Choose the cost function}{section*.7}% 14
+\BOOKMARK [1][-]{section*.17}{Conclusions and where do we stand}{section*.2}% 15
